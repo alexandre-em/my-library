@@ -14,7 +14,11 @@ def generate_book_info(path, content):
     res['author'] = data
     pattern = b'(?<=Release Date:)(.*)'
     data = search_keyword(pattern, str(re.search(pattern, content)))
-    res['release_date'] = data
+    if not data:
+        res['release_date'] = data
+    else:
+        year = re.search(' ([1-3][0-9]{3})', data).group()
+        res['release_date'] = int(year)
     pattern = b'(?<=Language:)(.*)'
     data = search_keyword(pattern, str(re.search(pattern, content)))
     res['language'] = data

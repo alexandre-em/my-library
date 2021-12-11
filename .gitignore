@@ -3,6 +3,14 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.env
+
+### data folder
+data/books
+data/books.json
+data/logfile.log
+data/*.swp
+api/books.json
 
 ### STS ###
 .apt_generated
