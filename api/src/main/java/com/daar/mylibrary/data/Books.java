@@ -11,11 +11,20 @@ public class Books {
     private Long id;
     @Column(unique = true)
     private final String bookId=UUID.randomUUID().toString(); // public id
+    @Column(name="TITLE", length=8192)
     private String title;
     private int year;
     private String language;
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
+    public Books() {}
+    public Books(String title, int year, String language, String content) {
+        this.title=title;
+        this.year=year;
+        this.language=language;
+        this.content=content;
+    }
 
 //    @ManyToOne
 //    @JoinColumn(name = "authors_id")

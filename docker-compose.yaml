@@ -33,6 +33,10 @@ services:
     ports:
       - "8080:8080"
     restart: always
+    environment:
+      MYSQL_URL: jdbc:mysql://localhost:3306/mylibrary
+      MYSQL_USER: em
+      MYSQL_PASSWORD: daar2021
     depends_on:
       db:
         condition: service_healthy

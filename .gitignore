@@ -10,7 +10,7 @@ data/books
 data/books.json
 data/logfile.log
 data/*.swp
-api/books.json
+api/src/main/resources/books.json
 
 ### STS ###
 .apt_generated
