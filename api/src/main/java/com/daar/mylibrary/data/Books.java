@@ -1,6 +1,7 @@
 package com.daar.mylibrary.data;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Entity
@@ -11,24 +12,26 @@ public class Books {
     private Long id;
     @Column(unique = true)
     private final String bookId=UUID.randomUUID().toString(); // public id
+    @NotNull(message = "A title is required")
     @Column(name="TITLE", length=8192)
     private String title;
     private int year;
     private String language;
+    @NotNull(message = "A content is required")
     @Column(columnDefinition = "LONGTEXT")
     private String content;
 
+    @ManyToOne
+    private Authors author;
+
     public Books() {}
-    public Books(String title, int year, String language, String content) {
+    public Books(String title, int year, String language, String content, Authors author) {
         this.title=title;
         this.year=year;
         this.language=language;
         this.content=content;
+        this.author=author;
     }
-
-//    @ManyToOne
-//    @JoinColumn(name = "authors_id")
-//    private Authors authors;
 
     public String getBookId() {
         return bookId;
@@ -42,30 +45,11 @@ public class Books {
         return year;
     }
 
-//    public Authors getAuthors() {
-//        return authors;
-//    }
+    public String getAuthorsId() {
+        return author.getAuthorId();
+    }
+
     public String getLanguage() {
         return language;
-    }
-
-//    public void setAuthors(Authors authors) {
-//        this.authors = authors;
-//    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
     }
 }
