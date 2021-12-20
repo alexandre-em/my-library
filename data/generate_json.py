@@ -36,10 +36,13 @@ def generate_json():
     result = []
     for i, file in enumerate(os.listdir(path)):
         if file.endswith(".txt"):
-            file_path = os.path.join(path, file)
-            with open(file_path, 'rb') as f:
-                content = f.read()
-                result.append(generate_book_info(file_path, content))
+            try:
+                file_path = os.path.join(path, file)
+                with open(file_path, 'rb') as f:
+                    content = f.read()
+                    result.append(generate_book_info(file_path, content))
+            except:
+                print("File operation failed")
     with open("books.json", "w") as f:
         json.dump(result, f, indent=4)
 

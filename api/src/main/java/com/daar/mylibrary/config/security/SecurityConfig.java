@@ -34,10 +34,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .mvcMatchers("/api/v1/books").authenticated()
-                .mvcMatchers("/api/v1/books").hasAuthority("SCOPE_read:books")
-                .mvcMatchers("/api/v1/authors").authenticated()
-                .mvcMatchers("/api/v1/authors").hasAuthority("SCOPE_read:authors")
+                .mvcMatchers("/api/v1/books/u").authenticated()
+                .mvcMatchers("/api/v1/books/u").hasAuthority("SCOPE_read:books")
+                .mvcMatchers("/api/v1/authors/u").authenticated()
+                .mvcMatchers("/api/v1/authors/u").hasAuthority("SCOPE_read:authors")
+                .mvcMatchers("/api/v1/books/a").authenticated()
+                .mvcMatchers("/api/v1/books/a").hasRole("Admin")
+                .mvcMatchers("/api/v1/authors/a").authenticated()
+                .mvcMatchers("/api/v1/authors/a").hasRole("Admin")
                 .and().cors()
                 .and().oauth2ResourceServer().jwt();
     }

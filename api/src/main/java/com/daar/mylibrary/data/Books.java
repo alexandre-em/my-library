@@ -52,4 +52,7 @@ public class Books {
     public String getLanguage() {
         return language;
     }
+    public String getContent() {
+        return content;
+    }
 }
