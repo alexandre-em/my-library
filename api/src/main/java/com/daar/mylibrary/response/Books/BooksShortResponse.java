@@ -17,4 +17,8 @@ public class BooksShortResponse implements Response {
     public String getTitle() {
         return book.getTitle();
     }
+
+    public String getAuthor() {
+        return book.getAuthorsName();
+    }
 }

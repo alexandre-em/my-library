@@ -49,6 +49,10 @@ public class Books {
         return author.getAuthorId();
     }
 
+    public String getAuthorsName() {
+        return author.getName();
+    }
+
     public String getLanguage() {
         return language;
     }

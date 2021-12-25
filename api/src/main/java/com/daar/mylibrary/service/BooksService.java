@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,9 @@ public class BooksService {
                         booksContentRepository.findBooksContByContent(search, PageRequest.of(page, limit)).stream().map(BooksCont::getId).collect(Collectors.toList()));
             case REGEX:
                 System.out.println("Regex");
-                List<String> ids = booksContentRepository.findBooksContentByContentMatchesRegex(search, PageRequest.of(page, limit)).stream().map(BooksCont::getId).collect(Collectors.toList()) ;
+                List<BooksCont> list = booksContentRepository.findBooksContentByContentMatchesRegex(search, PageRequest.of(page, limit));
+                System.out.println(list);
+                List<String> ids = list.stream().map(BooksCont::getId).collect(Collectors.toList()) ;
                 return booksRepository.findBooksByContentIn(ids);
             case YEAR:
                 int year;
@@ -59,12 +60,6 @@ public class BooksService {
 
     public List<Books> findBooksContentById(List<String> ids) {
         return booksRepository.findBooksByContentIn(ids);
-    }
-
-    public List<BooksCont> searchRegexSql(String search) {
-        List<String> searchList = new ArrayList<>();
-        searchList.add(search);
-        return booksContentRepository.findBooksContentByContentMatchesRegex(search, PageRequest.of(1, 20));
     }
 
     public Books addBook(Books book) {

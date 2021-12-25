@@ -32,14 +32,36 @@ public class BooksController {
     @Autowired
     private BooksService booksService;
 
-    @Operation(summary = "Search a book by a word", description = "Allows to add a book to the library.\n ### Permissions needed to access resources : \n- update:books")
-    @ApiResponse(responseCode = "201", description = "Book added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) })
-    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @Operation(summary = "Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by commas.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
+    @ApiResponse(responseCode = "200", description = "Books found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) })
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @GetMapping
     public ResponseEntity<Response> searchBookReg(@RequestParam String search,
+                                                  @RequestParam(name = "type", defaultValue = "DEFAULT", required = false) SearchType type,
+                                                  @RequestParam(name = "match_all", defaultValue = "false", required = false) boolean matchAll,
+                                                  @RequestParam(name = "limit", defaultValue = "20") int limit,
+                                                  @RequestParam(name = "current_page", defaultValue = "0") int page
+    ) {
+        try {
+            List<Response> books = booksService.searchBooks(search, type, matchAll, limit, page)
+                    .stream()
+                    .map(BooksShortResponse::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "[Protected] Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by commas.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
+    @ApiResponse(responseCode = "200", description = "Books founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) })
+    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @SecurityRequirement(name = "globalSecurity")
+    @GetMapping("/u")
+    public ResponseEntity<Response> searchBookUser(@RequestParam String search,
                                                   @RequestParam(name = "type", defaultValue = "DEFAULT", required = false) SearchType type,
                                                   @RequestParam(name = "match_all", defaultValue = "false", required = false) boolean matchAll,
                                                   @RequestParam(name = "limit", defaultValue = "20") int limit,
