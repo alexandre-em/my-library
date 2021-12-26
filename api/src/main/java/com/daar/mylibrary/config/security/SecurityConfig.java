@@ -1,7 +1,9 @@
 package com.daar.mylibrary.config.security;
 
+import com.auth0.spring.security.api.JwtWebSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -33,16 +35,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .mvcMatchers("/api/v1/books/u").authenticated()
-                .mvcMatchers("/api/v1/books/u").hasAuthority("SCOPE_read:books")
-                .mvcMatchers("/api/v1/authors/u").authenticated()
-                .mvcMatchers("/api/v1/authors/u").hasAuthority("SCOPE_read:authors")
-                .mvcMatchers("/api/v1/books/a").authenticated()
-                .mvcMatchers("/api/v1/books/a").hasRole("Admin")
-                .mvcMatchers("/api/v1/authors/a").authenticated()
-                .mvcMatchers("/api/v1/authors/a").hasRole("Admin")
-                .and().cors()
-                .and().oauth2ResourceServer().jwt();
+        JwtWebSecurityConfigurer
+                .forRS256(audience, issuer)
+                .configure(http)
+                .authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/api/v1/books").hasAuthority("PERMISSION_read:books")
+                .antMatchers(HttpMethod.GET, "/api/v1/books/index").hasAuthority("PERMISSION_read:books")
+                .antMatchers(HttpMethod.GET, "/api/v1/authors").hasAuthority("PERMISSION_read:authors")
+                .antMatchers(HttpMethod.POST, "/api/v1/books/protected").hasAuthority("PERMISSION_create:books");
     }
 }

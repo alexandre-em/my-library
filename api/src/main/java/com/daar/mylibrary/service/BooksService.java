@@ -1,12 +1,9 @@
 package com.daar.mylibrary.service;
 
-import com.daar.mylibrary.data.Authors;
-import com.daar.mylibrary.data.Books;
-import com.daar.mylibrary.data.BooksCont;
+import com.daar.mylibrary.data.*;
 import com.daar.mylibrary.exception.BadRequestException;
-import com.daar.mylibrary.repository.AuthorsRepository;
-import com.daar.mylibrary.repository.BooksContentRepository;
-import com.daar.mylibrary.repository.BooksRepository;
+import com.daar.mylibrary.exception.NotFoundException;
+import com.daar.mylibrary.repository.*;
 import com.daar.mylibrary.utils.SearchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +22,17 @@ public class BooksService {
     private BooksContentRepository booksContentRepository;
     @Autowired
     private AuthorsRepository authorsRepository;
+    @Autowired
+    private WordRepository wordRepository;
+    @Autowired
+    private WordIndexRepository wordIndexRepository;
+
+    public List<Books> searchBooksByIndex(String word, int page, int limit) throws BadRequestException, NotFoundException {
+        if (word.matches(".*\\d.*")) throw new BadRequestException("Your word contains a numeric value");
+        Word w = wordRepository.findWordByWordEquals(word);
+        if (w == null) throw new NotFoundException("There is no book containing a word matching yours");
+        return wordIndexRepository.findWordIndexByIdWordContaining(w, PageRequest.of(page, limit)).stream().map(WordIndex::getBook).collect(Collectors.toList());
+    }
 
     public List<Books> searchBooks(String search, SearchType type, boolean matchAll, int limit, int page) throws BadRequestException {
         switch(type) {

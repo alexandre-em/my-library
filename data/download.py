@@ -70,7 +70,7 @@ def main():
     # Example
     #       logfile.log : Unzipping file #99 books/10020.zip
     #       the number  : 99
-    url_num = 1705
+    url_num = 0
 
     if os.path.exists('urls_to_books.txt') and len(urls_to_books) == 0:
         with open('urls_to_books.txt', 'r') as f:

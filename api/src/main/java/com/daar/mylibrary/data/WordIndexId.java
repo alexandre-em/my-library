@@ -21,4 +21,12 @@ public class WordIndexId implements Serializable {
     }
 
     public WordIndexId() { }
+
+    public Books getBook() {
+        return book;
+    }
+
+    public Word getWord() {
+        return word;
+    }
 }
