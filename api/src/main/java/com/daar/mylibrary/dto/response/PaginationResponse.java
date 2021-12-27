@@ -1,4 +1,4 @@
-package com.daar.mylibrary.response;
+package com.daar.mylibrary.dto.response;
 
 import java.util.List;
 

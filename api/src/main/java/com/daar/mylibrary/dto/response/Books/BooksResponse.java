@@ -1,7 +1,7 @@
-package com.daar.mylibrary.response.Books;
+package com.daar.mylibrary.dto.response.Books;
 
 import com.daar.mylibrary.data.Books;
-import com.daar.mylibrary.response.Response;
+import com.daar.mylibrary.dto.response.Response;
 
 public class BooksResponse implements Response {
     private Books book;

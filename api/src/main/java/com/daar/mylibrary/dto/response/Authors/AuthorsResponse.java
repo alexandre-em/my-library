@@ -1,8 +1,8 @@
-package com.daar.mylibrary.response.Authors;
+package com.daar.mylibrary.dto.response.Authors;
 
 import com.daar.mylibrary.data.Authors;
-import com.daar.mylibrary.response.Books.BooksShortResponse;
-import com.daar.mylibrary.response.Response;
+import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
+import com.daar.mylibrary.dto.response.Response;
 
 import java.util.List;
 import java.util.stream.Collectors;

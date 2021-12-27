@@ -1,7 +1,7 @@
-package com.daar.mylibrary.response.Authors;
+package com.daar.mylibrary.dto.response.Authors;
 
 import com.daar.mylibrary.data.Authors;
-import com.daar.mylibrary.response.Response;
+import com.daar.mylibrary.dto.response.Response;
 
 public class AuthorsShortResponse implements Response {
     private Authors author;

@@ -19,8 +19,8 @@ public class ElasticSearchConfiguration {
     @Bean
     public RestHighLevelClient client() {
         ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-                .connectedTo("localhost:9200")
-                .withBasicAuth("elastic", "root")
+                .connectedTo(env.getProperty("spring.elasticsearch.uris"))
+                .withBasicAuth(env.getProperty("spring.elasticsearch.username"), env.getProperty("spring.elasticsearch.password"))
                 .withConnectTimeout(10000)
                 .build();
         return RestClients.create(clientConfiguration).rest();

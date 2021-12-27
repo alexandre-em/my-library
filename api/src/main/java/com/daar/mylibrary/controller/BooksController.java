@@ -3,10 +3,10 @@ package com.daar.mylibrary.controller;
 import com.daar.mylibrary.data.Books;
 import com.daar.mylibrary.exception.BadRequestException;
 import com.daar.mylibrary.exception.NotFoundException;
-import com.daar.mylibrary.response.Books.BooksShortResponse;
-import com.daar.mylibrary.response.ErrorResponse;
-import com.daar.mylibrary.response.PaginationResponse;
-import com.daar.mylibrary.response.Response;
+import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
+import com.daar.mylibrary.dto.response.ErrorResponse;
+import com.daar.mylibrary.dto.response.PaginationResponse;
+import com.daar.mylibrary.dto.response.Response;
 import com.daar.mylibrary.service.BooksService;
 import com.daar.mylibrary.utils.SearchType;
 import io.swagger.v3.oas.annotations.Operation;
@@ -103,9 +103,10 @@ public class BooksController {
         }
     }
 
-    @Operation(summary = "[Admin] Add book to the library", description = "Allows to add a book to the library.\n ### Permissions needed to access resources : \n- create:books")
+    @Operation(summary = "[Admin] Add book to the library", description = "Allows to add a book to the library.\n ### Permissions needed to access resources : \n- create:books\n- create:authors\n- read:books\n- read:authors")
     @ApiResponse(responseCode = "201", description = "Book added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BooksShortResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")

@@ -1,4 +1,4 @@
-package com.daar.mylibrary.response;
+package com.daar.mylibrary.dto.response;
 
 /**
  * Interface that allows to display a formatted response to a http request

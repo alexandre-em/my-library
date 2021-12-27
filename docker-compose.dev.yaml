@@ -74,9 +74,12 @@ services:
       - "8080:8080"
     restart: always
     environment:
-      MYSQL_URL: jdbc:mysql://db:3306/mylibrary
+      MYSQL_URI: jdbc:mysql://db:3306/mylibrary
       MYSQL_USER: em
       MYSQL_PASSWORD: daar2021
+      ELASTIC_URI: jdbc:mysql://db:3306/mylibrary
+      ELASTIC_USER: elastic
+      ELASTIC_PASSWORD: root
     depends_on:
       db:
         condition: service_healthy

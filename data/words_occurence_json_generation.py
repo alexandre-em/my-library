@@ -62,16 +62,11 @@ def generate_json():
             except Exception as e:
                 print(e)
         #break
-    #with open("books_words.json", "w") as f:
-    #    json.dump(words_set, f, indent=4)
+    with open("books_words.json", "w") as f:
+        json.dump(words_set, f, indent=4)
     with open("all_words.json", "w") as f:
         json.dump(list(all_words), f, indent=4)
 
 
 generate_json()
-
-
-# Print the contents of dictionary
-#for key in list(d.keys()):
-#    print(key, ":", d[key])
 
