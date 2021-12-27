@@ -1,0 +1,99 @@
+version: "2.1"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mylibrary
+      MYSQL_USER: em
+      MYSQL_PASSWORD: daar2021
+    ports:
+      - "3306:3306"
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - mylibrary
+    volumes:
+      - db-data:/var/lib/mysql
+
+  db2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+    container_name: elasticsearch
+    hostname: elasticsearch
+    volumes:
+      - db-data:/usr/share/elasticsearch/data:rw
+    environment:
+      ES_JAVA_OPTS: "-Xmx2g -Xms2g"
+      ELASTIC_PASSWORD: "root"
+      xpack.security.enabled: "true"
+      xpack.monitoring.collection.enabled: "true"
+      discovery.type: "single-node"
+      http.max_content_length: "2000mb"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://elastic:root@elasticsearch:9200"]
+    networks:
+      - mylibrary
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.15.0
+    container_name: kibana
+    hostname: kibana
+    volumes:
+      - ./config/kibana/:/usr/share/kibana/config/
+    ports:
+      - "5601:5601"
+    depends_on:
+      - db2
+    networks:
+      - mylibrary
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpadmin
+    ports:
+      - "8081:80"
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - mylibrary
+
+  api:
+    container_name: mylibrary-api
+    build: ./api
+    image: mylibrary-api:0.1
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      MYSQL_URI: jdbc:mysql://db:3306/mylibrary
+      MYSQL_USER: em
+      MYSQL_PASSWORD: daar2021
+      ELASTIC_URI: jdbc:mysql://db:3306/mylibrary
+      ELASTIC_USER: elastic
+      ELASTIC_PASSWORD: root
+    depends_on:
+      db:
+        condition: service_healthy
+      db2:
+        condition: service_healthy
+    volumes:
+      - "${HOME}/.m2:/root/.m2"
+    networks:
+      - mylibrary
+
+networks:
+  mylibrary:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local

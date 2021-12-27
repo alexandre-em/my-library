@@ -4,10 +4,14 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .env
+__pycache__
 
 ### data folder
+books_words_occ.json
+all_words.json
 data/books
 data/books.json
+/data/env
 data/logfile.log
 data/*.swp
 api/src/main/resources/books.json
