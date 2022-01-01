@@ -2,6 +2,7 @@ package com.daar.mylibrary.data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
@@ -20,6 +21,8 @@ public class Books {
     @NotNull(message = "A content is required")
     @Column(columnDefinition = "LONGTEXT")
     private String content;
+    @Column(name = "DELETED_AT")
+    private Timestamp deletedAt;
 
     @ManyToOne
     private Authors author;
@@ -31,6 +34,7 @@ public class Books {
         this.language=language;
         this.content=content;
         this.author=author;
+        this.deletedAt=null;
     }
 
     public String getBookId() {
@@ -58,5 +62,12 @@ public class Books {
     }
     public String getContent() {
         return content;
+    }
+
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+    public Timestamp getDeletedAt() {
+        return deletedAt;
     }
 }

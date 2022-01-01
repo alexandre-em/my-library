@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,14 +38,14 @@ public class BooksService {
     public List<Books> searchBooks(String search, SearchType type, boolean matchAll, int limit, int page) throws BadRequestException {
         switch(type) {
             case DEFAULT:
-                return booksRepository.findBooksByContentIn(
+                return booksRepository.findBooksByContentInAndDeletedAtIsNull(
                         booksContentRepository.findBooksContByContent(search, PageRequest.of(page, limit)).stream().map(BooksCont::getId).collect(Collectors.toList()));
             case REGEX:
                 System.out.println("Regex");
                 List<BooksCont> list = booksContentRepository.findBooksContentByContentMatchesRegex(search, PageRequest.of(page, limit));
                 System.out.println(list);
                 List<String> ids = list.stream().map(BooksCont::getId).collect(Collectors.toList()) ;
-                return booksRepository.findBooksByContentIn(ids);
+                return booksRepository.findBooksByContentInAndDeletedAtIsNull(ids);
             case YEAR:
                 int year;
                 try {
@@ -52,9 +53,9 @@ public class BooksService {
                 } catch (NumberFormatException e) {
                     throw new BadRequestException("The `YEAR` enumeration input must be a numeric value");
                 }
-                return booksRepository.findBooksByYear(year, PageRequest.of(page, limit));
+                return booksRepository.findBooksByYearAndDeletedAtIsNull(year, PageRequest.of(page, limit));
             case TITLE:
-                return booksRepository.findBooksByTitleContains(search, PageRequest.of(page, limit));
+                return booksRepository.findBooksByTitleContainsAndDeletedAtIsNull(search, PageRequest.of(page, limit));
             case AUTHOR:
                 return authorsRepository.findAuthorsByNameContains(search, PageRequest.of(page, limit))
                         .stream()
@@ -66,8 +67,16 @@ public class BooksService {
         }
     }
 
+    public List<Books> findAll(int page, int limit) { return booksRepository.findAllByDeletedAtIsNull(PageRequest.of(page, limit)); }
+    public Books findById(String uuid) { return booksRepository.findBooksByBookId(uuid); }
     public List<Books> findBooksContentById(List<String> ids) {
-        return booksRepository.findBooksByContentIn(ids);
+        return booksRepository.findBooksByContentInAndDeletedAtIsNull(ids);
+    }
+
+    public Books removeBookById(String uuid) {
+        Books books = booksRepository.findBooksByBookId(uuid);
+        books.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+        return booksRepository.save(books);
     }
 
     public Books addBook(Books book) {

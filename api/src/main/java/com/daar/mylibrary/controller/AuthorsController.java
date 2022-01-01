@@ -32,17 +32,4 @@ public class AuthorsController {
     @Autowired
     private AuthorsService authorsService;
 
-    @Operation(summary = "[User] Basic search of authors of the Gutenberg library", description = "Search books from `keyword` by passing the param `search`. \nYou can also filter the search by `type`, select an `algorithm` and paginate the results.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
-    @ApiResponse(responseCode = "200", description = "Author founded", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = AuthorsResponse.class))) })
-    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "404", description = "Author not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @SecurityRequirement(name = "globalSecurity")
-    @GetMapping
-    public ResponseEntity<List<Response>> search(@RequestParam("search") String input) {
-        List<Response> response = authorsService.searchAuthors(input)
-                .stream().map(AuthorsResponse::new).collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
 }

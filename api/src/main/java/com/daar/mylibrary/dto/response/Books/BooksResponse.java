@@ -23,7 +23,7 @@ public class BooksResponse implements Response {
     }
 
     public String getAuthor() {
-        return book.getAuthorsId();
+        return book.getAuthorsName();
     }
 
     public String getLanguage() {
