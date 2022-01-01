@@ -10,7 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "My Library API", version = "0.1", description = "Books information"), servers = @Server(url = "/"))
+@OpenAPIDefinition(info = @Info(title = "My Library API", version = "0.1", description = "Books information \n [Github](https://github.com/alexandre-em/my-library/)"), servers = @Server(url = "/"))
 @SecurityScheme(name = "globalSecurity", scheme = "bearer", bearerFormat = "JWT", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class MylibraryApplication {
 

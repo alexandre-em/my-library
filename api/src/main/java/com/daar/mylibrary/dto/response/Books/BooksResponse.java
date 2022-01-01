@@ -29,4 +29,8 @@ public class BooksResponse implements Response {
     public String getLanguage() {
         return book.getLanguage();
     }
+
+    public String getContent() {
+        return book.getContent();
+    }
 }

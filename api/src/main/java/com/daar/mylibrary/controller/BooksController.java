@@ -1,12 +1,15 @@
 package com.daar.mylibrary.controller;
 
-import com.daar.mylibrary.data.Books;
+import com.daar.mylibrary.dto.request.BooksRequest;
 import com.daar.mylibrary.dto.response.Books.BooksResponse;
 import com.daar.mylibrary.dto.response.ElementRemovedResponse;
 import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
 import com.daar.mylibrary.dto.response.ErrorResponse;
 import com.daar.mylibrary.dto.response.PaginationResponse;
 import com.daar.mylibrary.dto.response.Response;
+import com.daar.mylibrary.exception.BadRequestException;
+import com.daar.mylibrary.exception.FileNotSupportedException;
+import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.service.BooksService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,12 +23,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping(path="/api/v1/books", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path="/api/v1/books")
 @Tag(name="Books", description = "Gutenberg's english books")
 @CrossOrigin(origins = "*")
 public class BooksController {
@@ -60,10 +64,48 @@ public class BooksController {
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @PostMapping("/protected")
-    public ResponseEntity<Response> addBook(@RequestBody Books book) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new BooksShortResponse(booksService.addBook(book)));
+    public ResponseEntity<Response> addBook(@RequestBody BooksRequest book) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BooksShortResponse(booksService.addBook(null)));
     }
 
+    @Operation(summary = "[Admin] Update book information", description = "Allows to update information of a book.\n ### Permissions needed to access resources : \n- read:books\n- update:books")
+    @ApiResponse(responseCode = "200", description = "Book updated", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BooksShortResponse.class)) })
+    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @SecurityRequirement(name = "globalSecurity")
+    @PatchMapping("/protected/{id}")
+    public ResponseEntity<Response> updateBook(@PathVariable String id, @RequestBody BooksRequest book) {
+        try {
+            book.isEmpty();
+            return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.updateBook(id, book)));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "[Admin] Update book content", description = "Allows to update the content of a book.\n ### Permissions needed to access resources : \n- read:books\n- update:books")
+    @ApiResponse(responseCode = "200", description = "Book's content updated", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BooksShortResponse.class)) })
+    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @SecurityRequirement(name = "globalSecurity")
+    @PatchMapping("/protected/{id}/content")
+    public ResponseEntity<Response> updateBookContent(@PathVariable String id, @RequestParam("file")MultipartFile file) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.updateBookContent(id, file)));
+        } catch (BadRequestException | NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (FileNotSupportedException e) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(new ErrorResponse(e.getMessage()));
+        }
+    }
 
     @Operation(summary = "[Admin] Remove book", description = "Allows to soft remove a book.\n ### Permissions needed to access resources : \n- read:books\n- delete:books\n- update:books")
     @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })

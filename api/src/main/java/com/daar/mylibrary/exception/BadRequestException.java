@@ -1,13 +1,7 @@
 package com.daar.mylibrary.exception;
 
-public class BadRequestException extends Exception {
-    private String message;
+public class BadRequestException extends AbstractApiException {
     public BadRequestException(String message) {
-       this.message=message;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
+        super(message);
     }
 }

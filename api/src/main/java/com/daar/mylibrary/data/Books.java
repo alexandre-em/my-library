@@ -44,9 +44,15 @@ public class Books {
     public String getTitle() {
         return title;
     }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public int getYear() {
         return year;
+    }
+    public void setYear(int year) {
+        this.year = year;
     }
 
     public String getAuthorsId() {
@@ -56,18 +62,31 @@ public class Books {
     public String getAuthorsName() {
         return author.getName();
     }
+    public void setAuthorName(String author) {
+        this.author.setName(author);
+    }
+
+    public Authors getAuthor() { return author; }
+    public void setAuthor(Authors author) { this.author = author; }
 
     public String getLanguage() {
         return language;
     }
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     public String getContent() {
         return content;
     }
-
-    public void setDeletedAt(Timestamp deletedAt) {
-        this.deletedAt = deletedAt;
+    public void setContent(String content) {
+        this.content = content;
     }
+
     public Timestamp getDeletedAt() {
         return deletedAt;
+    }
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }
