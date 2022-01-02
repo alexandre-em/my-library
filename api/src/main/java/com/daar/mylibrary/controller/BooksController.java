@@ -12,6 +12,7 @@ import com.daar.mylibrary.exception.FileNotSupportedException;
 import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.service.BooksService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -63,9 +64,15 @@ public class BooksController {
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
-    @PostMapping("/protected")
-    public ResponseEntity<Response> addBook(@RequestBody BooksRequest book) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new BooksShortResponse(booksService.addBook(null)));
+    @PostMapping(value = "/protected")
+    public ResponseEntity<Response> addBook(@RequestBody BooksRequest book, @RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(new BooksShortResponse(booksService.addBook(book, file)));
+        } catch (FileNotSupportedException e) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(new ErrorResponse(e.getMessage()));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @Operation(summary = "[Admin] Update book information", description = "Allows to update information of a book.\n ### Permissions needed to access resources : \n- read:books\n- update:books")
@@ -94,8 +101,8 @@ public class BooksController {
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
-    @PatchMapping("/protected/{id}/content")
-    public ResponseEntity<Response> updateBookContent(@PathVariable String id, @RequestParam("file")MultipartFile file) {
+    @PatchMapping(value = "/protected/{id}/content", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response> updateBookContent(@PathVariable String id, @RequestParam(value = "file") @Parameter(schema = @Schema(type = "string", format = "binary")) MultipartFile file) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.updateBookContent(id, file)));
         } catch (BadRequestException | NullPointerException e) {

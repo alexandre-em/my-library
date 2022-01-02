@@ -88,24 +88,35 @@ public class BooksService {
         return booksRepository.save(books);
     }
 
-    public Books addBook(Books book) {
-        // TODO: Implement the method
-        return booksRepository.save(book);
-    }
-
-    public Books updateBookContent(String uuid, MultipartFile file) throws FileNotSupportedException, NotFoundException, BadRequestException {
+    public BooksCont uploadBookContent(MultipartFile file) throws BadRequestException, FileNotSupportedException, IOException {
         if (file.isEmpty()) throw  new BadRequestException("Please select a valid text file");
         String[] fn = file.getOriginalFilename().split("\\.");
         if (fn.length < 2) throw new FileNotSupportedException("File without extension not supported");
         String ext = fn[fn.length - 1]; // extracting file's extension
         if (!ext.toLowerCase().equals("txt")) throw new FileNotSupportedException("File with ."+ext+" extension not supported");
+        String content = new String(file.getBytes(), StandardCharsets.ISO_8859_1);
+        return booksContentRepository.save(new BooksCont(content));
+    }
+
+    public Books addBook(BooksRequest bookReq, MultipartFile file) throws FileNotSupportedException, BadRequestException {
+        Authors author = authorsRepository.findAuthorsByName(bookReq.authors);
+        if (author == null) authorsRepository.save(new Authors(bookReq.authors));
+        try {
+            BooksCont content = uploadBookContent(file);
+            Books book = new Books(bookReq.title, bookReq.year, bookReq.language, content.getId(), author);
+            return booksRepository.save(book);
+        } catch (IOException e) {
+            throw new BadRequestException("An error occurred while processing the text file");
+        }
+    }
+
+    public Books updateBookContent(String uuid, MultipartFile file) throws FileNotSupportedException, NotFoundException, BadRequestException {
         Books book = booksRepository.findBooksByBookId(uuid);
         if (book == null) throw new NotFoundException("Book with the following id not founded: " + uuid);
-        // TODO: continue by parsing the text file and save into elasticsearch
         try  {
-            String content = new String(file.getBytes(), StandardCharsets.ISO_8859_1);
+            BooksCont content = uploadBookContent(file);
             booksContentRepository.deleteById(book.getContent());
-            book.setContent(booksContentRepository.save(new BooksCont(content)).getId());
+            book.setContent(content.getId());
             return booksRepository.save(book);
         } catch (IOException e) {
             System.out.println(e.getMessage());
