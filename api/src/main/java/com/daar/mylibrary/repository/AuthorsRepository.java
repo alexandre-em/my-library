@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface AuthorsRepository extends CrudRepository<Authors, Long> {
    Authors findAuthorsByName(String name);
+   List<Authors> findAll(Pageable pageable);
+   Authors findAuthorsByAuthorId(String id);
    List<Authors> findAuthorsByNameContains(String keyword, Pageable pageable);
 }
