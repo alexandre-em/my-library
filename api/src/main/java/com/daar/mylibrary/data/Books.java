@@ -2,6 +2,7 @@ package com.daar.mylibrary.data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
@@ -20,6 +21,8 @@ public class Books {
     @NotNull(message = "A content is required")
     @Column(columnDefinition = "LONGTEXT")
     private String content;
+    @Column(name = "DELETED_AT")
+    private Timestamp deletedAt;
 
     @ManyToOne
     private Authors author;
@@ -31,6 +34,7 @@ public class Books {
         this.language=language;
         this.content=content;
         this.author=author;
+        this.deletedAt=null;
     }
 
     public String getBookId() {
@@ -40,9 +44,15 @@ public class Books {
     public String getTitle() {
         return title;
     }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public int getYear() {
         return year;
+    }
+    public void setYear(int year) {
+        this.year = year;
     }
 
     public String getAuthorsId() {
@@ -52,11 +62,31 @@ public class Books {
     public String getAuthorsName() {
         return author.getName();
     }
+    public void setAuthorName(String author) {
+        this.author.setName(author);
+    }
+
+    public Authors getAuthor() { return author; }
+    public void setAuthor(Authors author) { this.author = author; }
 
     public String getLanguage() {
         return language;
     }
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     public String getContent() {
         return content;
+    }
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Timestamp getDeletedAt() {
+        return deletedAt;
+    }
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

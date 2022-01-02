@@ -1,13 +1,7 @@
 package com.daar.mylibrary.exception;
 
-public class NotFoundException extends  Exception {
-    private String message;
+public class NotFoundException extends AbstractApiException {
     public NotFoundException(String message) {
-        this.message=message;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
+        super(message);
     }
 }

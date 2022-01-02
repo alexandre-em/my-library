@@ -30,6 +30,9 @@ public class Authors {
     public String getName() {
         return name;
     }
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getAuthorId() {
         return authorId;
@@ -40,6 +43,9 @@ public class Authors {
     }
 
     public void addBooks(Books book) {
-        books.add(book);
+        if (!books.contains(book))books.add(book);
+    }
+    public void removeBook(Books book) {
+        books.remove(book);
     }
 }
