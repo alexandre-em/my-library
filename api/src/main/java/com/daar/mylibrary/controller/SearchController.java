@@ -48,8 +48,10 @@ public class SearchController {
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @GetMapping("/authors")
-    public ResponseEntity<List<Response>> search(@RequestParam("search") String input) {
-        List<Response> response = authorsService.searchAuthors(input)
+    public ResponseEntity<List<Response>> search(@RequestParam("search") String input,
+                                                 @RequestParam(name = "current_page", defaultValue = "0") int page,
+                                                 @RequestParam(name = "limit", defaultValue = "20") int limit) {
+        List<Response> response = authorsService.searchAuthors(input, page, limit)
                 .stream().map(AuthorsResponse::new).collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
