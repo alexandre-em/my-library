@@ -45,6 +45,7 @@ public class Authors {
     public void addBooks(Books book) {
         if (!books.contains(book))books.add(book);
     }
+    public void addAllBooks(List<Books> booksList) { books.addAll(booksList); }
     public void removeBook(Books book) {
         books.remove(book);
     }

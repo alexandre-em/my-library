@@ -43,7 +43,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/v1/books/index").hasAuthority("PERMISSION_read:books")
                 .antMatchers(HttpMethod.GET, "/api/v1/authors").hasAuthority("PERMISSION_read:authors")
                 .antMatchers(HttpMethod.POST, "/api/v1/books/protected").hasAuthority("PERMISSION_create:books")
+                .antMatchers(HttpMethod.POST, "/api/v1/authors/protected").hasAuthority("PERMISSION_create:authors")
                 .antMatchers(HttpMethod.PATCH, "/api/v1/books/protected/{id}").hasAuthority("PERMISSION_update:books")
+                .antMatchers(HttpMethod.PUT, "/api/v1/authors/protected/{id}").hasAuthority("PERMISSION_update:authors")
+                .antMatchers(HttpMethod.PATCH, "/api/v1/authors/protected/{id}/books").hasAuthority("PERMISSION_update:authors")
                 .antMatchers(HttpMethod.PATCH, "/api/v1/books/protected/{id}/content").hasAuthority("PERMISSION_update:books")
                 .antMatchers(HttpMethod.DELETE, "/api/v1/books/protected/{id}").hasAuthority("PERMISSION_delete:books");
     }
