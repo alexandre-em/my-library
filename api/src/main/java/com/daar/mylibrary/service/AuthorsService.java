@@ -52,10 +52,11 @@ public class AuthorsService {
         List<Books> books = bookList
                 .getBookIds()
                 .stream()
-                .filter(bookId -> authorsBooks.contains(bookId) && booksRepository.findBooksByBookId(bookId) != null)
+                .filter(bookId -> !authorsBooks.contains(bookId) && booksRepository.findBooksByBookId(bookId) != null)
                 .map(bookId -> booksRepository.findBooksByBookId(bookId))
                 .collect(Collectors.toList());
         author.addAllBooks(books);
+        authorsRepository.save(author);
         return author;
     }
 }

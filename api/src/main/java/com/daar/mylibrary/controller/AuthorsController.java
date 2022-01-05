@@ -1,5 +1,6 @@
 package com.daar.mylibrary.controller;
 
+import com.daar.mylibrary.dto.request.AuthorName;
 import com.daar.mylibrary.dto.request.BookListRequest;
 import com.daar.mylibrary.dto.response.Authors.AuthorsResponse;
 import com.daar.mylibrary.dto.response.Authors.AuthorsShortResponse;
@@ -66,9 +67,9 @@ public class AuthorsController {
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @PostMapping(value = "/protected")
-    public ResponseEntity<Response> addBook(@RequestBody String name) {
+    public ResponseEntity<Response> addBook(@RequestBody AuthorName author) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(new AuthorsShortResponse(authorsService.addAuthor(name)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new AuthorsShortResponse(authorsService.addAuthor(author.name)));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         }
@@ -82,10 +83,10 @@ public class AuthorsController {
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @PutMapping("/protected/{id}")
-    public ResponseEntity<Response> updateAuthor(@PathVariable String id, @RequestParam("name") String name) {
+    public ResponseEntity<Response> updateAuthor(@PathVariable String id, @RequestBody AuthorName author) {
         try {
-            if (name.isEmpty()) throw new BadRequestException("Empty value not allowed");
-            return ResponseEntity.status(HttpStatus.OK).body(new AuthorsShortResponse(authorsService.updateName(id, name)));
+            if (author == null || author.name == null || author.name.isEmpty()) throw new BadRequestException("Empty value not allowed");
+            return ResponseEntity.status(HttpStatus.OK).body(new AuthorsShortResponse(authorsService.updateName(id, author.name)));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (NotFoundException e) {
