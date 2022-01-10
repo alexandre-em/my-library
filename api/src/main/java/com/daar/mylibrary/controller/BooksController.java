@@ -101,8 +101,8 @@ public class BooksController {
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
-    @PutMapping("/protected/{id}/image")
-    public ResponseEntity<Response> updateCoverBook(@PathVariable String id, @RequestParam("image") @Parameter(schema = @Schema(type = "string", format = "binary")) MultipartFile image) {
+    @PutMapping(path = "/protected/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response> updateCoverBook(@PathVariable String id, @RequestPart("image") MultipartFile image) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.updateBookCover(id, image)));
         } catch (BadRequestException e) {
