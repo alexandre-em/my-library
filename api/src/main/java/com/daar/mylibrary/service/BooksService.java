@@ -11,10 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -139,5 +146,48 @@ public class BooksService {
         if (booksRequest.language != null) book.setLanguage(booksRequest.language);
         if (booksRequest.year != 0) book.setYear(booksRequest.year);
         return booksRepository.save(book);
+    }
+
+
+    /**
+     * Convert a `MultipartFile` to a `File` by saving it into the static directory with a unique name
+     * @param file a binary file
+     * @return a `File` object
+     * @throws IOException
+     */
+    protected static File convertMultipartFile(MultipartFile file) throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String filename = timeStamp+"_"+file.getOriginalFilename(); // Generate a unique name for the file
+        String newPath = "./static/"+filename;
+        File tmp = new File(newPath);
+        tmp.createNewFile(); // Saving the file into the static directory to be accessible by typing the correct path
+        OutputStream os = new FileOutputStream(tmp);
+        os.write(file.getBytes());
+        return tmp;
+    }
+
+    public Books updateBookCover(String uuid, MultipartFile image) throws BadRequestException, NotFoundException, FileNotSupportedException {
+        // Check if book exists
+        Books book = booksRepository.findBooksByBookId(uuid);
+        if (book == null) throw new NotFoundException("Book with the following id not founded: " + uuid);
+
+        // Check file extension
+        String[] fn = image.getOriginalFilename().split("\\.");
+        if (fn.length < 2) throw new FileNotSupportedException("File without extension not supported");
+        String ext = fn[fn.length - 1]; // extracting file's extension
+
+        List<String> supportedFormat = Arrays.asList("jpg", "png");
+        if (!supportedFormat.contains(ext.toLowerCase())) throw new FileNotSupportedException("File with ."+ext+" extension not supported");
+
+        try  {
+            File imageFile = convertMultipartFile(image);
+            final String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); // get base url of the api
+            book.setImage(baseUrl + "/static/" + imageFile.getName());
+
+            return booksRepository.save(book);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new BadRequestException("An error occurred while processing the text file");
+        }
     }
 }

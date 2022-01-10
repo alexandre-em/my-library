@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 .env
 __pycache__
+api/static/*.jpg
+api/static/*.png
 
 ### data folder
 books_words_occ.json

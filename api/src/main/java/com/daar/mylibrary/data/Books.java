@@ -18,6 +18,7 @@ public class Books {
     private String title;
     private int year;
     private String language;
+    private String image;
     @NotNull(message = "A content is required")
     @Column(columnDefinition = "LONGTEXT")
     private String content;
@@ -88,5 +89,12 @@ public class Books {
     }
     public void setDeletedAt(Timestamp deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public String getImage() {
+        return image;
+    }
+    public void setImage(String image) {
+        this.image = image;
     }
 }
