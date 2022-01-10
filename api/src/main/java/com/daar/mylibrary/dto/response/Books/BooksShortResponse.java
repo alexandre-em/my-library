@@ -21,4 +21,8 @@ public class BooksShortResponse implements Response {
     public String getAuthor() {
         return book.getAuthorsName();
     }
+
+    public String getImage() {
+        return book.getImage();
+    }
 }

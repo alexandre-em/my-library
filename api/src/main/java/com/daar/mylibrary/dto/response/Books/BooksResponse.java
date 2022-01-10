@@ -33,4 +33,8 @@ public class BooksResponse implements Response {
     public String getContent() {
         return book.getContent();
     }
+
+    public String getImage() {
+        return book.getImage();
+    }
 }
