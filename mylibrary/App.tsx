@@ -1,68 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, Platform, Text, StyleSheet, View } from 'react-native';
-import jwtDecode from 'jwt-decode';
-import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
-import { AUTH0_DOMAIN, AUTH0_AUDIENCE, AUTH0_ID } from '@env';
 
-if (Platform.OS === 'web') { WebBrowser.maybeCompleteAuthSession(); }
 
-const auth0ClientId = AUTH0_ID;
-const authorizationEndpoint = `https://${AUTH0_DOMAIN}/authorize`;
 
-const useProxy = Platform.select({ native: true, default: false });
-const redirectUri = AuthSession.makeRedirectUri({ useProxy });
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Login from './Screen/Login';
+import Home from './Screen/Home';
+
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [name, setName] = useState(null);
-
-  const [request, response, promptAsync] = AuthSession.useAuthRequest({
-      redirectUri,
-      clientId: auth0ClientId,
-      responseType: AuthSession.ResponseType.Token,
-      scopes: ["openid", "profile", "email", "read:books", "read:authors"],
-      extraParams: {
-        audience: `${AUTH0_AUDIENCE}`,
-      },
-    },
-    { authorizationEndpoint });
-
-  useEffect(() => {
-    if (response?.type === 'success' && response.authentication?.accessToken) {
-      const { accessToken } = response.authentication;
-
-      console.log(accessToken);
-    }
-  }, [request, response])
 
   return (
-    <View style={styles.container}>
-      {name ? (
-        <>
-          <Text style={styles.title}>You are logged in, {name}!</Text>
-          <Button title="Log out" onPress={() => setName(null)} />
-        </>
-      ) : (
-        <Button
-          disabled={!request}
-          title="Log in with Auth0"
-          onPress={() => promptAsync({ useProxy })}
-        />
-      )}
-    </View>
+    <NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Home" component={Home} />
+    </Stack.Navigator>
+  </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    textAlign: "center",
-    marginTop: 40,
-  },
-});
