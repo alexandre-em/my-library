@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "mylibrary",
-    "slug": "library-test",
+    "slug": "mylibrary",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
