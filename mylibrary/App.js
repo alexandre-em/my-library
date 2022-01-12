@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import React from 'react';
-import { View } from 'react-native-web';
+import { View } from 'react-native';
 import { ActivityIndicator, Provider as PaperProvider } from 'react-native-paper';
 import { Provider } from 'react-redux';
 import {

@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 
 import { authSlice } from 'store';
 import useAuthentication from 'hooks/useAuthentication';
-import svgXml from 'assets/undraw_books_l-33-t.svg';
+import Book from 'assets/undraw_Books_l33t.png';
 import SvgDisplay from 'components/SvgDisplay';
 
 const styles = StyleSheet.create({
@@ -32,7 +32,7 @@ export default function Authentication() {
   const dispatch = useDispatch();
   const { request, login } = useAuthentication();
 
-  const imageWidth = Math.min(400, Dimensions.get('window').width * 0.75);
+  const width = Math.min(400, Dimensions.get('window').width * 0.75);
 
   const handleSkip = useCallback(() => {
     dispatch(authSlice.actions.set({
@@ -45,7 +45,7 @@ export default function Authentication() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Library</Text>
-      <SvgDisplay xml={svgXml} width={imageWidth} height={300} />
+      <Image source={Book} style={{ width, height: width }} width={width} height={width} />
       <View style={styles.buttons}>
         <Button labelStyle={{ color: 'white' }} disabled={!request} mode="contained" icon="account-check" onPress={login}>
           Sign in

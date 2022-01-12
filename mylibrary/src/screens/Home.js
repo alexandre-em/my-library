@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Text, StyleSheet, View, FlatList } from 'react-native';
+import { Image, Text, StyleSheet, View, ScrollView, FlatList } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 
@@ -73,7 +73,7 @@ export default function Home() {
   };
 
   return (
-    <View>
+    <ScrollView>
 
       <TextInput
         autoCapitalize="none"
@@ -103,9 +103,7 @@ export default function Home() {
                   resizeMode: 'contain',
                   margin: 8,
                 }}
-                source={{
-                  uri: noImage,
-                }}
+                source={noImage}
               />
               <Text>{item.author}</Text>
               <Text>{item.title}</Text>
@@ -114,6 +112,6 @@ export default function Home() {
           )}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 }
