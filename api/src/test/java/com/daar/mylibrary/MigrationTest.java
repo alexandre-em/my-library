@@ -49,7 +49,9 @@ public class MigrationTest {
         JSONArray words = new JSONArray(booksString);
         for (int i=0; i<words.length(); i++) {
             if (((String) words.get(i)).matches(".*\\d.*")) continue;
-            wordRepository.save(new Word((String) words.get(i)));
+            Word w = wordRepository.findWordByWordEquals((String) words.get(i));
+            if (w == null)
+                wordRepository.save(new Word((String) words.get(i)));
         }
     }
 
@@ -58,7 +60,7 @@ public class MigrationTest {
         final String booksString = new String(Files.readAllBytes(resource.getFile().toPath()));
         JSONArray books = new JSONArray(booksString);
         HttpURLConnection connection = null;
-        for (int i=966; i<2001; i++) {
+        for (int i=990; i<2001; i++) {
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, Object> map;
             map = mapper.readValue(books.get(i).toString(), new TypeReference<HashMap<String, Object>>() {});
