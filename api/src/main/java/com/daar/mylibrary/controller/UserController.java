@@ -33,11 +33,10 @@ public class UserController {
     @Operation(summary = "Get User suggestion", description = "Allows to get user's suggestion.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
     @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @GetMapping("/{id}")
-    public ResponseEntity<List<Response>> getUser(@PathVariable String id) {
+    public ResponseEntity<List<Response>> getUserSuggestion(@PathVariable String id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(usersService.suggestionBooks(id).stream().map(BooksShortResponse::new).collect(Collectors.toList()));
         } catch (NotFoundException e) {
@@ -46,23 +45,21 @@ public class UserController {
     }
 
     @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
-    @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @PostMapping("/{id}")
     public ResponseEntity<Response> addUser(@PathVariable String id) {
-        return ResponseEntity.status(HttpStatus.OK).body(usersService.addUser(id)));
+        return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addUser(id)));
     }
 
     @Operation(summary = "Delete an User", description = "Allows to delete an user.\n ### Permissions needed to access resources : \n- read:users\n- \n- delete:users")
-    @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
-    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "200", description = "User removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @DeleteMapping("/{id}")
     public ResponseEntity<List<Response>> deleteUser(@PathVariable String id) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(usersService.deleteUser(id));
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.deleteUser(id)));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }

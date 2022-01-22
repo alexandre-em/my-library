@@ -101,6 +101,7 @@ public class SearchController {
     @Operation(summary = "[User] Search a book by an indexed word", description = "Search a book by keywords. Each keywords must be separated by commas.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
     @ApiResponse(responseCode = "200", description = "Books founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "Book not found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
