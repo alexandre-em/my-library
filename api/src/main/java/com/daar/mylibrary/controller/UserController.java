@@ -30,7 +30,7 @@ public class UserController {
     @Autowired
     UsersService usersService;
 
-    @Operation(summary = "Get User info", description = "Allows to soft remove a book.\n ### Permissions needed to access resources : \n- read:books\n- delete:books\n- update:books")
+    @Operation(summary = "Get User suggestion", description = "Allows to get user's suggestion.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
     @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -43,5 +43,13 @@ public class UserController {
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
+    @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @PostMapping("/{id}")
+    public ResponseEntity<Response> addUser(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.OK).body(usersService.addUser(id)));
     }
 }

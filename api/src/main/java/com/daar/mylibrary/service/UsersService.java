@@ -31,6 +31,8 @@ public class UsersService {
     }
 
     public User addUser(String id) {
+        User user = findUser(id);
+        if (user != null) return user;
         return userRepository.save(new User(id));
     }
 
