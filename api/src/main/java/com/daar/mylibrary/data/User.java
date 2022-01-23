@@ -52,7 +52,10 @@ public class User {
     }
 
     public void addKeyword(String keyword) {
-        this.keywords=this.keywords + keyword;
+        if (this.keywords != null)
+            this.keywords=this.keywords + "," + keyword;
+        else
+            this.keywords=keyword;
     }
 
     public void setDeletedAt(Timestamp deletedAt) {

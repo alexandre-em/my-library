@@ -1,6 +1,8 @@
 package com.daar.mylibrary.dto.response;
 
 
+import com.daar.mylibrary.data.User;
+
 public class UserResponse implements Response {
   private User user;
 

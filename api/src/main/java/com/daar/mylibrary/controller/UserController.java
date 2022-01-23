@@ -4,13 +4,13 @@ import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
 import com.daar.mylibrary.dto.response.ElementRemovedResponse;
 import com.daar.mylibrary.dto.response.ErrorResponse;
 import com.daar.mylibrary.dto.response.Response;
+import com.daar.mylibrary.dto.response.UserResponse;
 import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.service.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,12 +52,38 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addUser(id)));
     }
 
+    @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
+    @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @PatchMapping("/{id}/read/{book_id}")
+    public ResponseEntity<Response> addUserBook(@PathVariable String id, @PathVariable(name = "book_id") String bookId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addBooksRead(id, bookId)));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
+    @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @PatchMapping("/{id}/keywords")
+    public ResponseEntity<Response> addUserSearch(@PathVariable String id, @RequestBody List<String> keywords) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addKeyword(id, keywords)));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
     @Operation(summary = "Delete an User", description = "Allows to delete an user.\n ### Permissions needed to access resources : \n- read:users\n- \n- delete:users")
     @ApiResponse(responseCode = "200", description = "User removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @DeleteMapping("/{id}")
-    public ResponseEntity<List<Response>> deleteUser(@PathVariable String id) {
+    public ResponseEntity<Response> deleteUser(@PathVariable String id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.deleteUser(id)));
         } catch (NotFoundException e) {
