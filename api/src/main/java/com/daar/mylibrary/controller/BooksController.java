@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,8 +44,11 @@ public class BooksController {
     @GetMapping("/public/all")
     public ResponseEntity<Response> getBooks(@RequestParam(name = "current_page", defaultValue = "0") int page,
                                              @RequestParam(name = "limit", defaultValue = "20") int limit) {
+        StopWatch watch = new StopWatch();
+        watch.start();
         List<Response> books = booksService.findAll(page, limit).stream().map(BooksShortResponse::new).collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books));
+        watch.stop();
+        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books, watch.getTotalTimeMillis()));
     }
 
     @Operation(summary = "Book details")

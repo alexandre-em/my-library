@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,28 +42,34 @@ public class SearchController {
     private AuthorsService authorsService;
 
     @Operation(summary = "[User] Basic search of authors of the Gutenberg library", description = "Search books from `keyword` by passing the param `search`. \nYou can also filter the search by `type`, select an `algorithm` and paginate the results.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
-    @ApiResponse(responseCode = "200", description = "Author founded", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = AuthorsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "Author founded", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PaginationResponse.class))) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "404", description = "Author not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @GetMapping("/authors")
-    public ResponseEntity<List<Response>> search(@RequestParam("search") String input,
+    public ResponseEntity<Response> search(@RequestParam("search") String input,
                                                  @RequestParam(name = "current_page", defaultValue = "0") int page,
                                                  @RequestParam(name = "limit", defaultValue = "20") int limit) {
+        StopWatch watch = new StopWatch();
+        watch.start();
         List<Response> response = authorsService.searchAuthors(input, page, limit)
                 .stream().map(AuthorsResponse::new).collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        watch.stop();
+        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, response, watch.getTotalTimeMillis()));
     }
 
     private ResponseEntity<Response> search(String search, SearchType type, boolean matchAll, int limit, int page) {
         try {
+            StopWatch watch = new StopWatch();
+            watch.start();
             List<Response> books = booksService.searchBooks(search, type, matchAll, limit, page)
                     .stream()
                     .map(BooksShortResponse::new)
                     .collect(Collectors.toList());
-            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books));
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         }
@@ -111,11 +118,14 @@ public class SearchController {
                                                     @RequestParam(name = "current_page", defaultValue = "0") int page
     ) {
         try {
+            StopWatch watch = new StopWatch();
+            watch.start();
             List<Response> books = booksService.searchBooksByIndex(search, page, limit)
                     .stream()
                     .map(BooksShortResponse::new)
                     .collect(Collectors.toList());
-            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books));
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (NotFoundException e) {
