@@ -1,6 +1,7 @@
 package com.daar.mylibrary.controller;
 
 import com.daar.mylibrary.dto.request.BooksRequest;
+import com.daar.mylibrary.dto.request.ImageUploadReq;
 import com.daar.mylibrary.dto.response.Books.BooksResponse;
 import com.daar.mylibrary.dto.response.ElementRemovedResponse;
 import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
@@ -117,16 +118,12 @@ public class BooksController {
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
-    @PutMapping(path = "/protected/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response> updateCoverBook(@PathVariable String id, @RequestPart("image") MultipartFile image) {
+    @PutMapping(path = "/protected/{id}/image")
+    public ResponseEntity<Response> updateCoverBook(@PathVariable String id, @RequestBody ImageUploadReq image) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.updateBookCover(id, image)));
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.updateBookUrlCover(id, image.imageUrl)));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
-        } catch (FileNotSupportedException e) {
-            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
@@ -150,6 +147,8 @@ public class BooksController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (FileNotSupportedException e) {
             return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 

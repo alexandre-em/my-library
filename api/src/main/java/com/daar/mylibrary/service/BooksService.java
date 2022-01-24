@@ -157,6 +157,16 @@ public class BooksService {
         return tmp;
     }
 
+    public Books updateBookUrlCover(String uuid, String image) throws NotFoundException {
+        // Check if book exists
+        Books book = booksRepository.findBooksByBookId(uuid);
+        if (book == null) throw new NotFoundException("Book with the following id not founded: " + uuid);
+
+        book.setImage(image);
+
+        return booksRepository.save(book);
+    }
+
     public Books updateBookCover(String uuid, MultipartFile image) throws BadRequestException, NotFoundException, FileNotSupportedException {
         // Check if book exists
         Books book = booksRepository.findBooksByBookId(uuid);
@@ -178,7 +188,7 @@ public class BooksService {
             return booksRepository.save(book);
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            throw new BadRequestException("An error occurred while processing the text file");
+            throw new BadRequestException("An error occurred while processing the image file");
         }
     }
 }
