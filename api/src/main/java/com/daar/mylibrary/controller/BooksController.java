@@ -42,12 +42,16 @@ public class BooksController {
     @GetMapping("/public/all")
     public ResponseEntity<Response> getBooks(@RequestParam(name = "current_page", defaultValue = "0") int page,
                                              @RequestParam(name = "limit", defaultValue = "20") int limit) {
-        StopWatch watch = new StopWatch();
-        watch.start();
-        Page<Response> books = booksService.findAll(page, limit)
-                .map(BooksShortResponse::new);
-        watch.stop();
-        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(books, watch.getTotalTimeMillis()));
+        try {
+            StopWatch watch = new StopWatch();
+            watch.start();
+            Page<Response> books = booksService.findAll(page, limit)
+                    .map(BooksShortResponse::new);
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(books, watch.getTotalTimeMillis()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @Operation(summary = "Book details")
@@ -56,7 +60,11 @@ public class BooksController {
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @GetMapping("/public/{id}")
     public ResponseEntity<Response> getBook(@PathVariable String id) {
-        return ResponseEntity.status(HttpStatus.OK).body(new BooksResponse(booksService.findById(id)));
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new BooksResponse(booksService.findById(id)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
     }
 
 
@@ -75,6 +83,8 @@ public class BooksController {
             return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(new ErrorResponse(e.getMessage()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -95,6 +105,8 @@ public class BooksController {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -115,6 +127,8 @@ public class BooksController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (FileNotSupportedException e) {
             return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -149,6 +163,10 @@ public class BooksController {
     @SecurityRequirement(name = "globalSecurity")
     @DeleteMapping("/protected/{id}")
     public ResponseEntity<Response> removeBook(@PathVariable String id) {
-        return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.removeBookById(id)));
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new BooksShortResponse(booksService.removeBookById(id)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
     }
 }

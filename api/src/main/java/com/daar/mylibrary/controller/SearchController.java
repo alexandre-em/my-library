@@ -50,12 +50,16 @@ public class SearchController {
     public ResponseEntity<Response> search(@RequestParam("search") String input,
                                                  @RequestParam(name = "current_page", defaultValue = "0") int page,
                                                  @RequestParam(name = "limit", defaultValue = "20") int limit) {
-        StopWatch watch = new StopWatch();
-        watch.start();
-        Page<Response> response = authorsService.searchAuthors(input, page, limit)
-                .map(AuthorsResponse::new);
-        watch.stop();
-        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(response, watch.getTotalTimeMillis()));
+        try {
+            StopWatch watch = new StopWatch();
+            watch.start();
+            Page<Response> response = authorsService.searchAuthors(input, page, limit)
+                    .map(AuthorsResponse::new);
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(response, watch.getTotalTimeMillis()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     private ResponseEntity<Response> search(String search, SearchType type, boolean matchAll, int limit, int page) {
@@ -68,6 +72,8 @@ public class SearchController {
             return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -124,6 +130,8 @@ public class SearchController {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 }

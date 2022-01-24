@@ -41,6 +41,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(usersService.suggestionBooks(id).stream().map(BooksShortResponse::new).collect(Collectors.toList()));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -62,6 +64,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addBooksRead(id, bookId)));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -75,6 +79,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addKeyword(id, keywords)));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -88,6 +94,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.deleteUser(id)));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 }
