@@ -1,15 +1,19 @@
 package com.daar.mylibrary.dto.response;
 
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 
 public class PaginationResponse implements Response {
-    public int limit;
+    public int totalPage;
     public int current;
     public List<Response> data;
+    public Long requestTime;
 
-    public PaginationResponse(int limit, int current, List<Response> data) {
-        this.limit=limit;
-        this.current=current;
-        this.data=data;
+    public PaginationResponse(Page<Response> data, Long requestTime) {
+        this.totalPage= data.getTotalPages();
+        this.current= data.getNumberOfElements();
+        this.data=data.toList();
+        this.requestTime=requestTime;
     }
 }

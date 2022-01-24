@@ -18,10 +18,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,8 +44,16 @@ public class AuthorsController {
     @GetMapping("/public/all")
     public ResponseEntity<Response> getAuthors(@RequestParam(name = "current_page", defaultValue = "0") int page,
                                              @RequestParam(name = "limit", defaultValue = "20") int limit) {
-        List<Response> books = authorsService.findAll(page, limit).stream().map(AuthorsShortResponse::new).collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books));
+        try {
+            StopWatch watch = new StopWatch();
+            watch.start();
+            Page<Response> books = authorsService.findAll(page, limit)
+                    .map(AuthorsShortResponse::new);
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(books, watch.getTotalTimeMillis()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @Operation(summary = "Author details")
@@ -56,6 +66,8 @@ public class AuthorsController {
             return ResponseEntity.status(HttpStatus.OK).body(new AuthorsResponse(authorsService.findById(id)));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -72,6 +84,8 @@ public class AuthorsController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new AuthorsShortResponse(authorsService.addAuthor(author.name)));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -91,6 +105,8 @@ public class AuthorsController {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -107,6 +123,8 @@ public class AuthorsController {
             return ResponseEntity.status(HttpStatus.OK).body(new AuthorsShortResponse(authorsService.addBooks(id, bookIds) ));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 }

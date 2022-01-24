@@ -44,13 +44,19 @@ public class MigrationTest {
     String API_URL = "http://localhost:8000/";
 
     @Test
-    void test() throws IOException, JSONException {
+    void saveWords() throws IOException, JSONException {
         final String booksString = new String(Files.readAllBytes(allWords.getFile().toPath()));
         JSONArray words = new JSONArray(booksString);
         for (int i=0; i<words.length(); i++) {
             if (((String) words.get(i)).matches(".*\\d.*")) continue;
-            wordRepository.save(new Word((String) words.get(i)));
+            Word w = wordRepository.findWordByWordEquals((String) words.get(i));
+            if (w == null)
+                wordRepository.save(new Word((String) words.get(i)));
         }
+    }
+
+    @Test
+    void linkBooks() {
     }
 
     @Test
@@ -58,7 +64,7 @@ public class MigrationTest {
         final String booksString = new String(Files.readAllBytes(resource.getFile().toPath()));
         JSONArray books = new JSONArray(booksString);
         HttpURLConnection connection = null;
-        for (int i=966; i<2001; i++) {
+        for (int i=1887; i<2001; i++) {
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, Object> map;
             map = mapper.readValue(books.get(i).toString(), new TypeReference<HashMap<String, Object>>() {});
