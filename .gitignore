@@ -18,6 +18,8 @@ data/logfile.log
 data/*.swp
 api/src/main/resources/books.json
 api/src/main/resources/static/*
+api/static/books/
+
 
 ### STS ###
 .apt_generated

@@ -8,6 +8,7 @@ import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.repository.AuthorsRepository;
 import com.daar.mylibrary.repository.BooksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +22,10 @@ public class AuthorsService {
     @Autowired
     private BooksRepository booksRepository;
 
-    public List<Authors> searchAuthors(String input, int current, int limit) {
+    public Page<Authors> searchAuthors(String input, int current, int limit) {
         return authorsRepository.findAuthorsByNameContains(input, PageRequest.of(current, limit));
     }
-    public List<Authors> findAll(int page, int limit) {
+    public Page<Authors> findAll(int page, int limit) {
         return authorsRepository.findAll(PageRequest.of(page, limit));
     }
     public Authors findById(String uuid) throws NotFoundException {

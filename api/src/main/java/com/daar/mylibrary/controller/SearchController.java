@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(path="/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -54,22 +52,20 @@ public class SearchController {
                                                  @RequestParam(name = "limit", defaultValue = "20") int limit) {
         StopWatch watch = new StopWatch();
         watch.start();
-        List<Response> response = authorsService.searchAuthors(input, page, limit)
-                .stream().map(AuthorsResponse::new).collect(Collectors.toList());
+        Page<Response> response = authorsService.searchAuthors(input, page, limit)
+                .map(AuthorsResponse::new);
         watch.stop();
-        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, response, watch.getTotalTimeMillis()));
+        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(response, watch.getTotalTimeMillis()));
     }
 
     private ResponseEntity<Response> search(String search, SearchType type, boolean matchAll, int limit, int page) {
         try {
             StopWatch watch = new StopWatch();
             watch.start();
-            List<Response> books = booksService.searchBooks(search, type, matchAll, limit, page)
-                    .stream()
-                    .map(BooksShortResponse::new)
-                    .collect(Collectors.toList());
+            Page<Response> res = booksService.searchBooks(search, type, matchAll, limit, page)
+                    .map(BooksShortResponse::new);
             watch.stop();
-            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books, watch.getTotalTimeMillis()));
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         }
@@ -120,12 +116,10 @@ public class SearchController {
         try {
             StopWatch watch = new StopWatch();
             watch.start();
-            List<Response> books = booksService.searchBooksByIndex(search, page, limit)
-                    .stream()
-                    .map(BooksShortResponse::new)
-                    .collect(Collectors.toList());
+            Page<Response> books = booksService.searchBooksByIndex(search, page, limit)
+                    .map(BooksShortResponse::new);
             watch.stop();
-            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books, watch.getTotalTimeMillis()));
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(books, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (NotFoundException e) {

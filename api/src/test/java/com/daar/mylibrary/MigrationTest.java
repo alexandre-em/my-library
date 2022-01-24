@@ -44,7 +44,7 @@ public class MigrationTest {
     String API_URL = "http://localhost:8000/";
 
     @Test
-    void test() throws IOException, JSONException {
+    void saveWords() throws IOException, JSONException {
         final String booksString = new String(Files.readAllBytes(allWords.getFile().toPath()));
         JSONArray words = new JSONArray(booksString);
         for (int i=0; i<words.length(); i++) {
@@ -56,11 +56,15 @@ public class MigrationTest {
     }
 
     @Test
+    void linkBooks() {
+    }
+
+    @Test
     void migrate() throws IOException, JSONException {
         final String booksString = new String(Files.readAllBytes(resource.getFile().toPath()));
         JSONArray books = new JSONArray(booksString);
         HttpURLConnection connection = null;
-        for (int i=990; i<2001; i++) {
+        for (int i=1887; i<2001; i++) {
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, Object> map;
             map = mapper.readValue(books.get(i).toString(), new TypeReference<HashMap<String, Object>>() {});

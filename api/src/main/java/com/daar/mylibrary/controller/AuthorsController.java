@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,9 +46,10 @@ public class AuthorsController {
                                              @RequestParam(name = "limit", defaultValue = "20") int limit) {
         StopWatch watch = new StopWatch();
         watch.start();
-        List<Response> books = authorsService.findAll(page, limit).stream().map(AuthorsShortResponse::new).collect(Collectors.toList());
+        Page<Response> books = authorsService.findAll(page, limit)
+                .map(AuthorsShortResponse::new);
         watch.stop();
-        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(limit, page, books, watch.getTotalTimeMillis()));
+        return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(books, watch.getTotalTimeMillis()));
     }
 
     @Operation(summary = "Author details")

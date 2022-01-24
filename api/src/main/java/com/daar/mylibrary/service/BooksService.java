@@ -8,6 +8,7 @@ import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.repository.*;
 import com.daar.mylibrary.utils.SearchType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 
@@ -40,24 +40,22 @@ public class BooksService {
     @Autowired
     private WordIndexRepository wordIndexRepository;
 
-    public List<Books> searchBooksByIndex(String word, int page, int limit) throws BadRequestException, NotFoundException {
+    public Page<Books> searchBooksByIndex(String word, int page, int limit) throws BadRequestException, NotFoundException {
         if (word.matches(".*\\d.*")) throw new BadRequestException("Your word contains a numeric value");
         Word w = wordRepository.findWordByWordEquals(word);
         if (w == null) throw new NotFoundException("There is no book containing a word matching yours");
-        return wordIndexRepository.findWordIndexByIdWordContaining(w, PageRequest.of(page, limit)).stream().map(WordIndex::getBook).collect(Collectors.toList());
+        return wordIndexRepository.findWordIndexByIdWordContaining(w, PageRequest.of(page, limit)).map(WordIndex::getBook);
     }
 
-    public List<Books> searchBooks(String search, SearchType type, boolean matchAll, int limit, int page) throws BadRequestException {
+    public Page<Books> searchBooks(String search, SearchType type, boolean matchAll, int limit, int page) throws BadRequestException {
         switch(type) {
             case DEFAULT:
-                return booksRepository.findBooksByContentInAndDeletedAtIsNull(
-                        booksContentRepository.findBooksContByContent(search, PageRequest.of(page, limit)).stream().map(BooksCont::getId).collect(Collectors.toList()));
+                System.out.println(limit+" "+page);
+                return booksContentRepository.findBooksContByContent(search, PageRequest.of(page, limit))
+                        .map(booksCont -> booksRepository.findBooksByContent(booksCont.getId()));
             case REGEX:
-                System.out.println("Regex");
-                List<BooksCont> list = booksContentRepository.findBooksContentByContentMatchesRegex(search, PageRequest.of(page, limit));
-                System.out.println(list);
-                List<String> ids = list.stream().map(BooksCont::getId).collect(Collectors.toList()) ;
-                return booksRepository.findBooksByContentInAndDeletedAtIsNull(ids);
+                return booksContentRepository.findBooksContentByContentMatchesRegex(search, PageRequest.of(page, limit))
+                        .map(booksCont -> booksRepository.findBooksByContent(booksCont.getId()));
             case YEAR:
                 int year;
                 try {
@@ -69,21 +67,14 @@ public class BooksService {
             case TITLE:
                 return booksRepository.findBooksByTitleContainsAndDeletedAtIsNull(search, PageRequest.of(page, limit));
             case AUTHOR:
-                return authorsRepository.findAuthorsByNameContains(search, PageRequest.of(page, limit))
-                        .stream()
-                        .map(Authors::getBooks)
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList());
+                return booksRepository.findBooksByAuthors(search, PageRequest.of(page, limit));
             default:
                 throw new BadRequestException("`Type` must be a value of the `SearchType` enumeration");
         }
     }
 
-    public List<Books> findAll(int page, int limit) { return booksRepository.findAllByDeletedAtIsNull(PageRequest.of(page, limit)); }
+    public Page<Books> findAll(int page, int limit) { return booksRepository.findAllByDeletedAtIsNull(PageRequest.of(page, limit)); }
     public Books findById(String uuid) { return booksRepository.findBooksByBookId(uuid); }
-    public List<Books> findBooksContentById(List<String> ids) {
-        return booksRepository.findBooksByContentInAndDeletedAtIsNull(ids);
-    }
 
     public Books removeBookById(String uuid) {
         Books books = booksRepository.findBooksByBookId(uuid);
