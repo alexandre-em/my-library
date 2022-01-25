@@ -23,7 +23,7 @@ const getAll = (currentPage = 0, limit = 20) => (
  * @param {string} uuid - Public id of the book
  * @returns {Promise<AxiosResponse<BookShortRes>>}
  */
-const getId = (uuid) => baseUrl.get(`book/public/${uuid}`);
+const getId = (uuid) => baseUrl.get(`books/public/${uuid}`);
 
 /**
  *

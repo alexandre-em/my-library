@@ -51,6 +51,7 @@ export default function useAuthentication() {
 
   const logout = useCallback(async () => {
     const redirection = AuthSession.makeRedirectUri({ useProxy });
+    //console.log(AUTH0_DOMAIN);
     try {
       WebBrowser
         .openAuthSessionAsync(`https://${AUTH0_DOMAIN}/v2/logout?client_id=${AUTH0_ID}&returnTo=${redirection}`);

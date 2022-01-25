@@ -5,6 +5,9 @@ import { useSelector } from 'react-redux';
 
 import { getAll, getId } from 'services';
 import noImage from 'assets/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg';
+import CardBook from 'components/CardBook';
+import SearchBar from 'components/SearchBar';
+
 
 const styles = StyleSheet.create({
   flatlist: {
@@ -17,6 +20,11 @@ const styles = StyleSheet.create({
   },
   itemGrid: {
     flexGrow: 1,
+  },
+  containerCard :{
+    dispay : 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
 });
 
@@ -74,8 +82,14 @@ export default function Home() {
 
   return (
     <ScrollView>
-
-      <TextInput
+      <SearchBar />
+      <View style={styles.containerCard}>
+        {publicBooks.map(item=>
+          <CardBook key={item.id} item = {item}></CardBook>
+        )}
+      </View>
+      
+      {/*<TextInput
         autoCapitalize="none"
         autoCorrect={false}
         onChangeText={(text) => handleSearch(text)}
@@ -86,7 +100,7 @@ export default function Home() {
       <Button labelStyle={{ color: 'white' }} disabled={!searchBook} mode="contained">Search</Button>
 
       <Text>Recommandation</Text>
-
+      
       <View>
         <FlatList
           style={styles.flatlist}
@@ -105,13 +119,15 @@ export default function Home() {
                 }}
                 source={noImage}
               />
-              <Text>{item.author}</Text>
               <Text>{item.title}</Text>
-              <Text>-------</Text>
+              <CardBook title = {item.title} author = {item.author}></CardBook>
             </View>
           )}
         />
-      </View>
+              </View>*/}
+
+
+
     </ScrollView>
   );
 }

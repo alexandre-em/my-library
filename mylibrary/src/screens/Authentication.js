@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { authSlice } from 'store';
 import useAuthentication from 'hooks/useAuthentication';
 import Book from 'assets/undraw_Books_l33t.png';
-import SvgDisplay from 'components/SvgDisplay';
+//import SvgDisplay from 'components/SvgDisplay';
 
 const styles = StyleSheet.create({
   container: {

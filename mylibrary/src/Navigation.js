@@ -31,7 +31,7 @@ export default function Navigation() {
   if (isAuthenticated !== true && isGuest !== true) {
     return <Authentication />;
   }
-
+//ajout des routes
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName={screen.Home}>
