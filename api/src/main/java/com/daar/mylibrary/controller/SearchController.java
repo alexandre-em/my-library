@@ -1,5 +1,6 @@
 package com.daar.mylibrary.controller;
 
+import com.daar.mylibrary.dto.request.UserToken;
 import com.daar.mylibrary.dto.response.Authors.AuthorsResponse;
 import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
 import com.daar.mylibrary.dto.response.ErrorResponse;
@@ -9,7 +10,9 @@ import com.daar.mylibrary.exception.BadRequestException;
 import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.service.AuthorsService;
 import com.daar.mylibrary.service.BooksService;
+import com.daar.mylibrary.service.UsersService;
 import com.daar.mylibrary.utils.SearchType;
+import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -24,10 +28,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StopWatch;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Controller
 @RequestMapping(path="/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -38,6 +43,8 @@ public class SearchController {
     private BooksService booksService;
     @Autowired
     private AuthorsService authorsService;
+    @Autowired
+    private UsersService usersService;
 
     @Operation(summary = "[User] Basic search of authors of the Gutenberg library", description = "Search books from `keyword` by passing the param `search`. \nYou can also filter the search by `type`, select an `algorithm` and paginate the results.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
     @ApiResponse(responseCode = "200", description = "Author founded", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PaginationResponse.class))) })
@@ -102,8 +109,23 @@ public class SearchController {
                                                    @RequestParam(name = "type", defaultValue = "DEFAULT", required = false) SearchType type,
                                                    @RequestParam(name = "match_all", defaultValue = "false", required = false) boolean matchAll,
                                                    @RequestParam(name = "limit", defaultValue = "20") int limit,
-                                                   @RequestParam(name = "current_page", defaultValue = "0") int page
+                                                   @RequestParam(name = "current_page", defaultValue = "0") int page,
+                                                   @RequestHeader(name= "Authorization") String token
     ) {
+        // Decoding authorization token
+        String[] pieces = token.split("\\.");
+        String b64payload = pieces[1];
+        String jsonString = new String(Base64.decodeBase64(b64payload), StandardCharsets.UTF_8);
+        UserToken userToken = new Gson().fromJson(jsonString, UserToken.class);
+
+        // Separate each keyword by a comma
+        String[] s = search.split(",");
+
+        try {
+            usersService.addKeyword(userToken.sub, Arrays.asList(s));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("not found"));
+        }
         return search(search, type, matchAll, limit, page);
     }
 
