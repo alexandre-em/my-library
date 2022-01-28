@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import { View } from 'react-native';
-import { ActivityIndicator, Provider as PaperProvider } from 'react-native-paper';
+import { ActivityIndicator, Provider as PaperProvider, DarkTheme } from 'react-native-paper';
 import { Provider } from 'react-redux';
 import {
   useFonts,
@@ -14,9 +14,9 @@ import {
 } from '@expo-google-fonts/roboto';
 
 import { theme } from './src/config';
+
 import store from './src/store';
 import Navigation from './src/Navigation';
-
 export default function App() {
   const [fontsLoaded] = useFonts({
     Roboto_100Thin,

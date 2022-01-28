@@ -6,6 +6,8 @@ export default function SearchBar() {
 
     const onChangeSearch = query => setSearchQuery(query);
 
+    
+
   return (
     <Searchbar
       placeholder="Search"

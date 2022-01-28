@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Text, StyleSheet, View, ScrollView, FlatList } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { BottomNavigation, Button, TextInput } from 'react-native-paper';
 import { useSelector } from 'react-redux';
-
 import { getAll, getId } from 'services';
 import noImage from 'assets/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg';
 import CardBook from 'components/CardBook';
 import SearchBar from 'components/SearchBar';
+import Search from './Search';
+import Books from './Books';
 
 
 const styles = StyleSheet.create({
@@ -30,11 +31,12 @@ const styles = StyleSheet.create({
 
 export default function Home() {
   const [publicBooks, setPublicBooks] = useState([]);
-  const [searchBook, setSearchBook] = useState([]);
-  const [renderBook, setRenderBook] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPage, setTotalPage] = useState(0);
   const auth = useSelector((state) => state.auth);
 
   useEffect(() => {
+    /*
     getAll()
       .then((res) => {
         // setBooks(books => [...books, res])
@@ -42,11 +44,24 @@ export default function Home() {
         console.log(res);
         setPublicBooks(res.data.data);
         setRenderBook(res.data.data);
+        setTotalPage(res.data.totalPage)
       })
       .catch((err) => {
         console.log(err);
-      });
+      });*/
+      
   }, []);
+
+  const changePage = (nb) =>{
+    if((nb+page < totalPage) && (page+nb >=0)){
+      getAll(nb+page,20).then((res)=>{
+        setPage(nb+page);
+        setPublicBooks(res.data.data);
+      }
+      )
+    }
+    
+  }
 
   const searchById = (id) => {
     getId(id)
@@ -79,8 +94,29 @@ export default function Home() {
       setRenderBook(publicBooks);
     }
   };
+  const searchRoute = () => <Search />
+
+  const booksRoute = () => <Books />
+  const [index, setIndex] = useState(0);
+    
+  const [routes,setRoutes] = useState([
+    { key: 'books', title: 'Books', icon: 'book' },
+    { key: 'search', title: 'Search', icon: 'mdiMagnify'}
+  ]);
+
+  const renderScene = BottomNavigation.SceneMap({
+    search: searchRoute,
+    books: booksRoute,
+  });
+
 
   return (
+    <BottomNavigation
+      navigationState={{ index, routes }}
+      onIndexChange={setIndex}
+      renderScene={renderScene}
+      />
+    /*
     <ScrollView>
       <SearchBar />
       <View style={styles.containerCard}>
@@ -88,8 +124,17 @@ export default function Home() {
           <CardBook key={item.id} item = {item}></CardBook>
         )}
       </View>
-      
-      {/*<TextInput
+      <View style={{display:'flex',flexDirection: 'row'}}>
+        {page-1 >=0?<Button style={{width:"5%"}} mode="contained" onPress={() => changePage(-1)}>{"<"}</Button>:<></>}
+        <Text style={{marginTop:8}}>{page}</Text>
+        {1+page < totalPage?<Button style={{width:"5%"}} mode="contained" onPress={() => changePage(1)}>{">"}</Button>:<></>}
+      </View>
+      <BottomNavigation
+      navigationState={{ index, routes }}
+      onIndexChange={setIndex}
+      renderScene={renderScene}
+      />
+      <TextInput
         autoCapitalize="none"
         autoCorrect={false}
         onChangeText={(text) => handleSearch(text)}
@@ -124,10 +169,10 @@ export default function Home() {
             </View>
           )}
         />
-              </View>*/}
-
+              </View>
 
 
     </ScrollView>
+    */
   );
 }
