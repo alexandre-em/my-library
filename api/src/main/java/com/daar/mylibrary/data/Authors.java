@@ -6,6 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <h1>Authors model</h1>
+ * Representing an author of a Book, it contains all its information and all his books.
+ * @see Books
+ * @author Alexandre Em
+ */
 @Entity
 public class Authors {
     @Id
