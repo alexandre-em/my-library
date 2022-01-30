@@ -65,7 +65,7 @@ public class UserController {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addBooksRead(id, bookId)));
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
