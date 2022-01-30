@@ -1,18 +1,18 @@
 package com.daar.mylibrary.service;
 
-import com.daar.mylibrary.data.Authors;
 import com.daar.mylibrary.data.Books;
 import com.daar.mylibrary.data.User;
 import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.repository.BooksRepository;
 import com.daar.mylibrary.repository.UserRepository;
+import com.daar.mylibrary.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UsersService {
@@ -28,7 +28,7 @@ public class UsersService {
     public List<Books> suggestionBooks(String id) throws NotFoundException {
         User user = findUser(id);
         if (user == null) throw new NotFoundException("user not found");
-        return booksRepository.findBooksByAuthorNotIn(id);
+        return booksRepository.findBooksByAuthorNotIn(id, PageRequest.of(0, Constants.suggestionMax));
     }
 
     public User addUser(String id) {

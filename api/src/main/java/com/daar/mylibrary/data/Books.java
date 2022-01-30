@@ -5,6 +5,17 @@ import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+/**
+ * <h1>Books model</h1>
+ * Representing a Book of the Gutenberg library, containing all its information and a reference of its content that is
+ * stored on a ElasticSearch database. An indexed table linking a book with all its non stop words has also been
+ * implemented to allow a quick search.
+ * @see BooksCont
+ * @see Word
+ * @see WordIndex
+ * @see Authors
+ * @author Alexandre Em
+ */
 @Entity
 @Table(name = "books")
 public class Books {

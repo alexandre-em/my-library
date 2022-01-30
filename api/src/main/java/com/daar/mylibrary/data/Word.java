@@ -4,6 +4,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
+/**
+ * <h1>Word model</h1>
+ * Listing all words of all books.
+ * @see Books
+ * @author Alexandre Em
+ */
 @Entity
 @Table(name = "word")
 public class Word {
