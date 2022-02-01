@@ -5,6 +5,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <h1>User model</h1>
+ * Representing an user of the application that is used to store Auth0 registered user metadata like read books or
+ * keywords history. It can also use the Auth0 Management API to update user personal info, to create a complete
+ * profile on our mobile application.
+ * @see Books
+ * @author Alexandre Em
+ */
 @Entity
 @Table(name = "auth0_user")
 public class User {

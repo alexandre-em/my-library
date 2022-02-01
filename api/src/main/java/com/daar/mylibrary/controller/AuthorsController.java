@@ -26,9 +26,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Controller
 @RequestMapping(path = "/api/v1/authors", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name="Authors", description = "Gutenberg's authors")

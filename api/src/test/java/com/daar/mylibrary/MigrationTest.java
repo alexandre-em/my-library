@@ -64,7 +64,7 @@ public class MigrationTest {
         final String booksString = new String(Files.readAllBytes(resource.getFile().toPath()));
         JSONArray books = new JSONArray(booksString);
         HttpURLConnection connection = null;
-        for (int i=1887; i<2001; i++) {
+        for (int i=1946; i<2001; i++) {
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, Object> map;
             map = mapper.readValue(books.get(i).toString(), new TypeReference<HashMap<String, Object>>() {});

@@ -1,10 +1,7 @@
 package com.daar.mylibrary.controller;
 
+import com.daar.mylibrary.dto.response.*;
 import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
-import com.daar.mylibrary.dto.response.ElementRemovedResponse;
-import com.daar.mylibrary.dto.response.ErrorResponse;
-import com.daar.mylibrary.dto.response.Response;
-import com.daar.mylibrary.dto.response.UserResponse;
 import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.service.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,11 +34,15 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @GetMapping("/{id}")
-    public ResponseEntity<List<Response>> getUserSuggestion(@PathVariable String id) {
+    public ResponseEntity<Response> getUserSuggestion(@PathVariable String id) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(usersService.suggestionBooks(id).stream().map(BooksShortResponse::new).collect(Collectors.toList()));
+            StopWatch watch = new StopWatch();
+            watch.start();
+            List<Response> suggestion = usersService.suggestionBooks(id).stream().map(BooksShortResponse::new).collect(Collectors.toList());
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new ListResponse(suggestion, watch.getTotalTimeMillis(), "SUGGESTION_BOOKS"));
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -63,7 +65,7 @@ public class UserController {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addBooksRead(id, bookId)));
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }

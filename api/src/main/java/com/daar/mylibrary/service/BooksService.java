@@ -42,6 +42,10 @@ public class BooksService {
 
     public Page<Books> searchBooksByIndex(String word, int page, int limit) throws BadRequestException, NotFoundException {
         if (word.matches(".*\\d.*")) throw new BadRequestException("Your word contains a numeric value");
+//        List<Word> w = Arrays.stream(word.split(" "))
+//                .flatMap(wd -> wordRepository.findWordByWordContaining(wd).stream())
+//                .distinct()
+//                .collect(Collectors.toList());
         Word w = wordRepository.findWordByWordEquals(word);
         if (w == null) throw new NotFoundException("There is no book containing a word matching yours");
         return wordIndexRepository.findWordIndexByIdWordContaining(w, PageRequest.of(page, limit)).map(WordIndex::getBook);
@@ -145,6 +149,7 @@ public class BooksService {
      * @param file a binary file
      * @return a `File` object
      * @throws IOException
+     * @see File
      */
     protected static File convertMultipartFile(MultipartFile file) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
