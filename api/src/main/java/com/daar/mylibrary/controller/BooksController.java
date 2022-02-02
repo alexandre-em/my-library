@@ -2,6 +2,7 @@ package com.daar.mylibrary.controller;
 
 import com.daar.mylibrary.dto.request.BooksRequest;
 import com.daar.mylibrary.dto.request.ImageUploadReq;
+import com.daar.mylibrary.dto.response.Books.BooksContentResponse;
 import com.daar.mylibrary.dto.response.Books.BooksResponse;
 import com.daar.mylibrary.dto.response.ElementRemovedResponse;
 import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
@@ -68,6 +69,21 @@ public class BooksController {
         }
     }
 
+    @Operation(summary = "Book details")
+    @ApiResponse(responseCode = "200", description = "Book found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BooksContentResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "Book not found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @SecurityRequirement(name = "globalSecurity")
+    @GetMapping("/protected/{id}/content")
+    public ResponseEntity<Response> getBookContent(@PathVariable String id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new BooksContentResponse(booksService.findBooksCont(id)));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
+    }
 
     @Operation(summary = "[Admin] Add book", description = "Allows to add a book.\n ### Permissions needed to access resources : \n- create:books\n- create:authors\n- read:books\n- read:authors")
     @ApiResponse(responseCode = "201", description = "Book added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BooksShortResponse.class)) })

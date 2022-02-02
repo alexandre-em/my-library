@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.Integer.parseInt;
 
@@ -75,6 +76,16 @@ public class BooksService {
             default:
                 throw new BadRequestException("`Type` must be a value of the `SearchType` enumeration");
         }
+    }
+
+    public BooksCont findBooksCont(String uuid) throws NotFoundException {
+        Books book = booksRepository.findBooksByBookId(uuid);
+        if (book == null) throw new NotFoundException("Book not found");
+        System.out.println(book.getContent());
+        Optional<BooksCont> cont = booksContentRepository.findById(book.getContent());
+        if (!cont.isPresent()) throw  new NotFoundException("Error Content not found");
+
+        return cont.get();
     }
 
     public Page<Books> findAll(int page, int limit) { return booksRepository.findAllByDeletedAtIsNull(PageRequest.of(page, limit)); }

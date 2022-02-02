@@ -13,4 +13,8 @@ public class BooksContentResponse implements Response {
     public String getBooksId() {
         return booksContent.getId();
     }
+
+    public String getBooksContent() {
+        return booksContent.getContent();
+    }
 }
