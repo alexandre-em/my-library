@@ -36,6 +36,7 @@ public class UsersService {
         if (authorB.size() > Constants.suggestionMax) return authorB;
         List<String> keywords = Arrays.asList(user.getKeywords().split(","));
         int n = Constants.suggestionMax - authorB.size();
+        if (n <= 0) return authorB;
         List<Books> history = booksRepository.findBooksByContentInAndDeletedAtIsNull(booksContentRepository
                 .findBooksContByContent(keywords, PageRequest.of(0, n))
                 .map(BooksCont::getId).getContent(), PageRequest.of(0, n))
