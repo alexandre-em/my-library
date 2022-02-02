@@ -63,6 +63,7 @@ public class UserController {
 
     @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
     @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
@@ -80,6 +81,7 @@ public class UserController {
 
     @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
     @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
@@ -101,12 +103,11 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteUser(@PathVariable String id, @RequestHeader(name = "Authorization", required = false) String token) {
-        if (!Objects.equals(id, Constants.decodeToken(token).sub)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse("User id does not match"));
+    public ResponseEntity<Response> deleteUser(@PathVariable String id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.deleteUser(id)));
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }

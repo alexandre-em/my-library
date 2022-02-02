@@ -1,8 +1,10 @@
 package com.daar.mylibrary.service;
 
 import com.daar.mylibrary.data.Books;
+import com.daar.mylibrary.data.BooksCont;
 import com.daar.mylibrary.data.User;
 import com.daar.mylibrary.exception.NotFoundException;
+import com.daar.mylibrary.repository.BooksContentRepository;
 import com.daar.mylibrary.repository.BooksRepository;
 import com.daar.mylibrary.repository.UserRepository;
 import com.daar.mylibrary.utils.Constants;
@@ -20,6 +22,8 @@ public class UsersService {
     UserRepository userRepository;
     @Autowired
     BooksRepository booksRepository;
+    @Autowired
+    BooksContentRepository booksContentRepository;
 
     public User findUser(String id) {
         return userRepository.findByUserIdAndDeletedAtIsNull(id);
@@ -28,7 +32,16 @@ public class UsersService {
     public List<Books> suggestionBooks(String id) throws NotFoundException {
         User user = findUser(id);
         if (user == null) throw new NotFoundException("user not found");
-        return booksRepository.findBooksByAuthorNotIn(id, PageRequest.of(0, Constants.suggestionMax));
+        List<Books> authorB = booksRepository.findBooksByAuthorNotIn(id, PageRequest.of(0, Constants.suggestionMax));
+        if (authorB.size() > Constants.suggestionMax) return authorB;
+        List<String> keywords = Arrays.asList(user.getKeywords().split(","));
+        int n = Constants.suggestionMax - authorB.size();
+        List<Books> history = booksRepository.findBooksByContentInAndDeletedAtIsNull(booksContentRepository
+                .findBooksContByContent(keywords, PageRequest.of(0, n))
+                .map(BooksCont::getId).getContent(), PageRequest.of(0, n))
+                .getContent();
+        authorB.addAll(history);
+        return authorB;
     }
 
     public User addUser(String id) {
