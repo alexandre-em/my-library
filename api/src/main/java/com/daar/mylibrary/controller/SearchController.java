@@ -11,8 +11,8 @@ import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.service.AuthorsService;
 import com.daar.mylibrary.service.BooksService;
 import com.daar.mylibrary.service.UsersService;
+import com.daar.mylibrary.utils.Constants;
 import com.daar.mylibrary.utils.SearchType;
-import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -30,8 +29,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Controller
@@ -110,14 +107,10 @@ public class SearchController {
                                                    @RequestParam(name = "match_all", defaultValue = "false", required = false) boolean matchAll,
                                                    @RequestParam(name = "limit", defaultValue = "20") int limit,
                                                    @RequestParam(name = "current_page", defaultValue = "0") int page,
-                                                   @RequestHeader(name= "Authorization") String token
+                                                   @RequestHeader(name= "Authorization", required = false) String token
     ) {
         // Decoding authorization token
-        String[] pieces = token.split("\\.");
-        String b64payload = pieces[1];
-        String jsonString = new String(Base64.decodeBase64(b64payload), StandardCharsets.UTF_8);
-        UserToken userToken = new Gson().fromJson(jsonString, UserToken.class);
-
+        UserToken userToken = Constants.decodeToken(token);
         // Separate each keyword by a comma
         String[] s = search.split(",");
 
@@ -139,9 +132,13 @@ public class SearchController {
     @GetMapping("/books/index")
     public ResponseEntity<Response> searchBookIndex(@RequestParam String search,
                                                     @RequestParam(name = "limit", defaultValue = "20") int limit,
-                                                    @RequestParam(name = "current_page", defaultValue = "0") int page
+                                                    @RequestParam(name = "current_page", defaultValue = "0") int page,
+                                                    @RequestHeader(name= "Authorization", required = false) String token
     ) {
+        UserToken userToken = Constants.decodeToken(token);
+        String[] s = search.split(",");
         try {
+            usersService.addKeyword(userToken.sub, Arrays.asList(s));
             StopWatch watch = new StopWatch();
             watch.start();
             Page<Response> books = booksService.searchBooksByIndex(search, page, limit)
