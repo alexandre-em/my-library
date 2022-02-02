@@ -14,7 +14,7 @@ import { baseUrl, baseUrlAuthorization } from 'config';
  * @param {number} [limit=20] - default=20
  * @returns {Promise<AxiosResponse<BookShortRes>>}
  */
-const getAll = (currentPage = 0, limit = 20) => (
+const getAll = (currentPage = 0, limit) => (
   baseUrl.get(`books/public/all?current_page=${currentPage}&limit=${limit}`)
 );
 
@@ -49,6 +49,8 @@ const publicSearch = (input, type = 'DEFAULT', currentPage = 0, limit = 20) => (
 const userSearch = (input, accessToken, type = 'DEFAULT', currentPage = 0, limit = 20) => (
   baseUrlAuthorization(accessToken).get(`books/public?search=${input}&type=${type}&limit=${limit}&current_page=${currentPage}`)
 );
+
+
 
 export {
   getAll,

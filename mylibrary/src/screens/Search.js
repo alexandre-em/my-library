@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { Searchbar } from 'react-native-paper';
 import { publicSearch, userSearch } from 'services';
 import CardBook from 'components/CardBook';
+import jwt_decode from "jwt-decode";
 
 export default function Search() {
 
@@ -28,7 +29,7 @@ export default function Search() {
         if(auth.isAuthenticated){
             userSearch(searchQuery, auth.accessToken)
             .then((res)=>{
-                console.log(res);
+                //console.log(res);
                 setPublicBooks(res.data.data);
                 setTotalPage(res.data.totalPage)
             })
@@ -39,7 +40,7 @@ export default function Search() {
         else{
             publicSearch(searchQuery)
             .then((res)=>{
-                console.log(res);
+                //console.log(res);
                 setPublicBooks(res.data.data);
                 setTotalPage(res.data.totalPage)
             })
@@ -48,25 +49,29 @@ export default function Search() {
             });
         }
     }
+    //const token = jwt_decode(auth.accessToken);
+    //console.log(token.sub)
 
     return (
         <ScrollView>
+            
             <Searchbar
                 placeholder="Search"
                 onChangeText={onChangeSearch}
                 value={searchQuery}
                 onIconPress={()=>searchBook()}
                 onSubmitEditing={()=>searchBook()}
+                style={{margin:10}}
             />
             <View style={styles.containerCard}>
                 {publicBooks.map(item=>
                     <CardBook key={item.id} item = {item}></CardBook>
                 )}
             </View>
-            <View style={{display:'flex',flexDirection: 'row'}}>
-                {page-1 >=0?<Button style={{width:"5%"}} mode="contained" onPress={() => changePage(-1)}>{"<"}</Button>:<></>}
+            <View style={styles.footerScroll}>
+                {page-1 >=0?<Button style={{width:"5%",marginRight:30}} mode="contained" onPress={() => changePage(-1)}>{"<"}</Button>:<></>}
                 <Text style={{marginTop:8}}>{page}</Text>
-                {1+page < totalPage?<Button style={{width:"5%"}} mode="contained" onPress={() => changePage(1)}>{">"}</Button>:<></>}
+                {1+page < totalPage?<Button style={{width:"5%",marginRight:30}} mode="contained" onPress={() => changePage(1)}>{">"}</Button>:<></>}
             </View>
         </ScrollView>
     );
@@ -89,4 +94,13 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       flexWrap: 'wrap',
     },
+    footerScroll :{
+        display:'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop : 10,
+        marginBottom : 10,
+        marginLeft : 10,
+        marginRight : 10,
+      },
   });

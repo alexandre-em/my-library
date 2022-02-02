@@ -2,51 +2,82 @@ import CardBook from 'components/CardBook';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
-import { getAll, getId } from 'services';
+import { getAll, getId, userSearch } from 'services';
 import { Button } from 'react-native-paper';
-
+import jwt_decode from "jwt-decode";
+import { userSuggestion } from 'services/users';
+import { Title } from 'react-native-paper';
 
 export default function Books() {
     const [publicBooks, setPublicBooks] = useState([]);
     const [page, setPage] = useState(0);
     const [totalPage, setTotalPage] = useState(0);
     const auth = useSelector((state) => state.auth);
+    const [suggest, setSuggest] = useState([]);
+
     useEffect(() => {
-    
-        getAll()
+        suggestion();
+        getAll(0,10)
           .then((res) => {
             // setBooks(books => [...books, res])
-            console.log(auth.accessToken); // contient le token pour les requetes prives (si login)
-            console.log(res);
+            //console.log(auth.accessToken); // contient le token pour les requetes prives (si login)
+            //console.log(res);
             setPublicBooks(res.data.data);
             setTotalPage(res.data.totalPage)
           })
           .catch((err) => {
-            console.log(err);
+            //console.log(err);
           });
       }, []);
     
     const changePage = (nb) =>{
         if((nb+page < totalPage) && (page+nb >=0)){
-          getAll(nb+page,20).then((res)=>{
+          getAll(nb+page,10).then((res)=>{
             setPage(nb+page);
             setPublicBooks(res.data.data);
           })
         }
     }
 
+    const suggestion = () =>{
+
+      if(auth.isAuthenticated){
+        const token = jwt_decode(auth.accessToken);
+
+        userSuggestion(token.sub,auth.accessToken)
+        .then((res)=>{
+          console.log(res)
+          setSuggest(res.data.data);
+        })
+      }
+    }
+
+    
+
 return(
     <ScrollView>
-        {console.log(auth)}
+
+      {auth.isAuthenticated&&<Title style={{display:'flex', justifyContent: 'center',fontFamily:"Roboto_900Black", fontSize:30, margin:10}}>Suggestion</Title>}
+        <ScrollView horizontal>
+          <View style={styles.suggestCard}>
+              {suggest.map(item=>
+              <CardBook key={item.id} item = {item}></CardBook>
+              )}
+          </View>
+        </ScrollView>
+        
+
+        <Title style={{display:'flex', justifyContent: 'center',fontFamily:"Roboto_900Black", fontSize:30, marginTop:30, marginBottom:10}}>Liste des livres</Title>
+
         <View style={styles.containerCard}>
             {publicBooks.map(item=>
             <CardBook key={item.id} item = {item}></CardBook>
             )}
         </View>
-        <View style={{display:'flex',flexDirection: 'row'}}>
-            {page-1 >=0?<Button style={{width:"5%"}} mode="contained" onPress={() => changePage(-1)}>{"<"}</Button>:<></>}
+        <View style={styles.footerScroll}>
+            {page-1 >=0?<Button style={{width:"5%",marginRight:30}} mode="contained" onPress={() => changePage(-1)}>{"<"}</Button>:<></>}
             <Text style={{marginTop:8}}>{page}</Text>
-            {1+page < totalPage?<Button style={{width:"5%"}} mode="contained" onPress={() => changePage(1)}>{">"}</Button>:<></>}
+            {1+page < totalPage?<Button style={{width:"5%",marginLeft:30}} mode="contained" onPress={() => changePage(1)}>{">"}</Button>:<></>}
         </View>
     </ScrollView>
     );
@@ -65,9 +96,25 @@ const styles = StyleSheet.create({
     itemGrid: {
       flexGrow: 1,
     },
+    suggestCard :{
+      dispay : 'flex',
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+      justifyContent: 'center',
+    },
     containerCard :{
       dispay : 'flex',
       flexDirection: 'row',
       flexWrap: 'wrap',
+      justifyContent: 'center',
+    },
+    footerScroll :{
+      display:'flex',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop : 10,
+      marginBottom : 10,
+      marginLeft : 10,
+      marginRight : 10,
     },
   });

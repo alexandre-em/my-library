@@ -8,6 +8,7 @@ import CardBook from 'components/CardBook';
 import SearchBar from 'components/SearchBar';
 import Search from './Search';
 import Books from './Books';
+import Author from './Author';
 
 
 const styles = StyleSheet.create({
@@ -54,7 +55,7 @@ export default function Home() {
 
   const changePage = (nb) =>{
     if((nb+page < totalPage) && (page+nb >=0)){
-      getAll(nb+page,20).then((res)=>{
+      getAll(nb+page,10).then((res)=>{
         setPage(nb+page);
         setPublicBooks(res.data.data);
       }
@@ -66,11 +67,11 @@ export default function Home() {
   const searchById = (id) => {
     getId(id)
       .then((res) => {
-        console.log(res);
+        //console.log(res);
         setSearchBook(res.data);
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
       });
   };
 
@@ -86,7 +87,7 @@ export default function Home() {
 
   const handleSearch = (text) => {
     const dataBook = publicBooks.filter((book) => contains(text, book));
-    console.log(dataBook);
+    //console.log(dataBook);
     // setPublicBooks(dataBook)
     if (dataBook) {
       setRenderBook(dataBook);
@@ -97,16 +98,20 @@ export default function Home() {
   const searchRoute = () => <Search />
 
   const booksRoute = () => <Books />
+  
+  const authorsRoute = () => <Author />
   const [index, setIndex] = useState(0);
     
   const [routes,setRoutes] = useState([
     { key: 'books', title: 'Books', icon: 'book' },
-    { key: 'search', title: 'Search', icon: 'mdiMagnify'}
+    { key: 'search', title: 'Search', icon: 'file-search-outline'},
+    { key: 'authors', title: 'Authors', icon: 'ticket-account'},
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
     search: searchRoute,
     books: booksRoute,
+    authors: authorsRoute,
   });
 
 

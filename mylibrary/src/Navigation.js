@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Button } from 'react-native-paper';
-
+import { Image } from 'react-native';
 import { screens as screen } from 'config';
 import { Authentication, Home } from 'screens';
 import useAuthentication from 'hooks/useAuthentication';
@@ -35,7 +35,10 @@ export default function Navigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName={screen.Home}>
-        <Stack.Screen name={screen.Home} component={Home} options={{ headerRight: logButton }} />
+        <Stack.Screen name='home' component={Home} options={{ headerRight: logButton, headerTitle: () => (<Image source={require('./assets/open-book.png')}
+        style={{
+          width: 60, height: 60,
+        }}/>)}} />
       </Stack.Navigator>
     </NavigationContainer>
   );

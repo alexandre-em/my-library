@@ -3,9 +3,13 @@ import { ScrollView, Dimensions  } from 'react-native';
 import { Avatar, Button, Card, Title, Paragraph, Dialog, Portal } from 'react-native-paper';
 import noImage from 'assets/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg';
 import { getId } from 'services';
+import jwt_decode from "jwt-decode";
+import { useSelector } from 'react-redux';
+import { bookRead } from 'services/users';
 
 export default function CardBook(props) {
     const { title, author, image, id } = props.item
+    const auth = useSelector((state) => state.auth);
 
     const windowHeight = Dimensions.get('window').height;
     const windowWidth = Dimensions.get('window').width;
@@ -19,17 +23,24 @@ export default function CardBook(props) {
     const affichageDonnees = (id) => {
         const res = getId(id)
         .then((res) => {
-          console.log(res);
+          //console.log(res);
           setBook(res.data);
         })
         .catch((err) => {
-          console.log(err);
+          //console.log(err);
         });
     }
 
     const openDialog = (id) =>{
         affichageDonnees(id);
         manageDialog();
+        const token = jwt_decode(auth.accessToken);
+        bookRead(token.sub,id, auth.accessToken).then((res)=>{
+          console.log(res)
+        })
+        .catch((err)=>{
+          console.log(err)
+        });
 
     }
 
