@@ -9,6 +9,7 @@ import com.daar.mylibrary.repository.BooksRepository;
 import com.daar.mylibrary.repository.UserRepository;
 import com.daar.mylibrary.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,12 @@ public class UsersService {
                 .getContent();
         authorB.addAll(history);
         return authorB;
+    }
+
+    public Page<Books> getReadBooks(String id, int page, int limit) throws NotFoundException {
+        User user = findUser(id);
+        if (user == null) throw new NotFoundException("user not found");
+        return userRepository.findUserReadBooks(id, PageRequest.of(page, limit));
     }
 
     public User addUser(String id) {
