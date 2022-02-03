@@ -6,13 +6,15 @@ import java.util.List;
 
 public class PaginationResponse implements Response {
     public int totalPage;
+    public Long totalElement;
     public int current;
     public List<Response> data;
     public Long requestTime;
 
     public PaginationResponse(Page<Response> data, Long requestTime) {
-        this.totalPage= data.getTotalPages();
-        this.current= data.getNumberOfElements();
+        this.totalPage = data.getTotalPages();
+        this.current = data.getNumberOfElements();
+        totalElement = data.getTotalElements();
         this.data=data.toList();
         this.requestTime=requestTime;
     }

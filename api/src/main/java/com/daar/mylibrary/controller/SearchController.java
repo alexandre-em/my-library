@@ -1,7 +1,9 @@
 package com.daar.mylibrary.controller;
 
+import com.daar.mylibrary.dto.request.IndexSearchType;
 import com.daar.mylibrary.dto.request.UserToken;
 import com.daar.mylibrary.dto.response.Authors.AuthorsResponse;
+import com.daar.mylibrary.dto.response.Books.BookScoringResponse;
 import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
 import com.daar.mylibrary.dto.response.ErrorResponse;
 import com.daar.mylibrary.dto.response.PaginationResponse;
@@ -12,7 +14,7 @@ import com.daar.mylibrary.service.AuthorsService;
 import com.daar.mylibrary.service.BooksService;
 import com.daar.mylibrary.service.UsersService;
 import com.daar.mylibrary.utils.Constants;
-import com.daar.mylibrary.utils.SearchType;
+import com.daar.mylibrary.dto.request.SearchType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -66,11 +68,11 @@ public class SearchController {
         }
     }
 
-    private ResponseEntity<Response> search(String search, SearchType type, boolean matchAll, int limit, int page) {
+    private ResponseEntity<Response> search(String search, SearchType type, int limit, int page) {
         try {
             StopWatch watch = new StopWatch();
             watch.start();
-            Page<Response> res = booksService.searchBooks(search, type, matchAll, limit, page)
+            Page<Response> res = booksService.searchBooks(search, type, limit, page)
                     .map(BooksShortResponse::new);
             watch.stop();
             return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
@@ -81,21 +83,20 @@ public class SearchController {
         }
     }
 
-    @Operation(summary = "Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by commas.")
+    @Operation(summary = "Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by a comma.")
     @ApiResponse(responseCode = "200", description = "Books found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) })
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @GetMapping("/books/public")
     public ResponseEntity<Response> searchBookReg(@RequestParam String search,
                                                   @RequestParam(name = "type", defaultValue = "DEFAULT", required = false) SearchType type,
-                                                  @RequestParam(name = "match_all", defaultValue = "false", required = false) boolean matchAll,
                                                   @RequestParam(name = "limit", defaultValue = "20") int limit,
                                                   @RequestParam(name = "current_page", defaultValue = "0") int page
     ) {
-        return search(search, type, matchAll, limit, page);
+        return search(search, type, limit, page);
     }
 
-    @Operation(summary = "[User] Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by commas.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
+    @Operation(summary = "[User] Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by a comma.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
     @ApiResponse(responseCode = "200", description = "Books founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -104,7 +105,6 @@ public class SearchController {
     @GetMapping("/books")
     public ResponseEntity<Response> searchBookUser(@RequestParam String search,
                                                    @RequestParam(name = "type", defaultValue = "DEFAULT", required = false) SearchType type,
-                                                   @RequestParam(name = "match_all", defaultValue = "false", required = false) boolean matchAll,
                                                    @RequestParam(name = "limit", defaultValue = "20") int limit,
                                                    @RequestParam(name = "current_page", defaultValue = "0") int page,
                                                    @RequestHeader(name= "Authorization", required = false) String token
@@ -119,7 +119,7 @@ public class SearchController {
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("not found"));
         }
-        return search(search, type, matchAll, limit, page);
+        return search(search, type, limit, page);
     }
 
     @Operation(summary = "[User] Search a book by an indexed word", description = "Search a book by keywords. Each keywords must be separated by commas.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
@@ -133,6 +133,7 @@ public class SearchController {
     public ResponseEntity<Response> searchBookIndex(@RequestParam String search,
                                                     @RequestParam(name = "limit", defaultValue = "20") int limit,
                                                     @RequestParam(name = "current_page", defaultValue = "0") int page,
+                                                    @RequestParam(name = "type", defaultValue = "DEFAULT") IndexSearchType type,
                                                     @RequestHeader(name= "Authorization", required = false) String token
     ) {
         UserToken userToken = Constants.decodeToken(token);
@@ -141,8 +142,8 @@ public class SearchController {
             usersService.addKeyword(userToken.sub, Arrays.asList(s));
             StopWatch watch = new StopWatch();
             watch.start();
-            Page<Response> books = booksService.searchBooksByIndex(search, page, limit)
-                    .map(BooksShortResponse::new);
+            Page<Response> books = booksService.searchBooksByIndex(search, type, page, limit)
+                    .map(BookScoringResponse::new);
             watch.stop();
             return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(books, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {

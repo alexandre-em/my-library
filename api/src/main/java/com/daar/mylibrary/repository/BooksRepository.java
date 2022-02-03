@@ -12,6 +12,7 @@ import java.util.List;
 public interface BooksRepository extends CrudRepository<Books, Long> {
     Books findBooksByBookId(String id);
     Books findBooksByContent(String id);
+    Page<Books> findBooksByBookIdInAndDeletedAtIsNull(List<String> ids, Pageable pageable);
     Page<Books> findAllByDeletedAtIsNull(Pageable pageable);
     Page<Books> findBooksByContentInAndDeletedAtIsNull(List<String> booksContentIds, Pageable pageable);
     Page<Books> findBooksByYearAndDeletedAtIsNull(int year, Pageable pageable);
