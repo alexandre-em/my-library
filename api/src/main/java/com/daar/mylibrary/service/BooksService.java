@@ -2,11 +2,12 @@ package com.daar.mylibrary.service;
 
 import com.daar.mylibrary.data.*;
 import com.daar.mylibrary.dto.request.BooksRequest;
+import com.daar.mylibrary.dto.request.IndexSearchType;
 import com.daar.mylibrary.exception.BadRequestException;
 import com.daar.mylibrary.exception.FileNotSupportedException;
 import com.daar.mylibrary.exception.NotFoundException;
 import com.daar.mylibrary.repository.*;
-import com.daar.mylibrary.utils.SearchType;
+import com.daar.mylibrary.dto.request.SearchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 
@@ -41,21 +43,25 @@ public class BooksService {
     @Autowired
     private WordIndexRepository wordIndexRepository;
 
-    public Page<Books> searchBooksByIndex(String word, int page, int limit) throws BadRequestException, NotFoundException {
+    public Page<BookScoring> searchBooksByIndex(String word, IndexSearchType type, int page, int limit) throws BadRequestException, NotFoundException {
         if (word.matches(".*\\d.*")) throw new BadRequestException("Your word contains a numeric value");
-//        List<Word> w = Arrays.stream(word.split(" "))
-//                .flatMap(wd -> wordRepository.findWordByWordContaining(wd).stream())
-//                .distinct()
-//                .collect(Collectors.toList());
-        Word w = wordRepository.findWordByWordEquals(word);
-        if (w == null) throw new NotFoundException("There is no book containing a word matching yours");
-        return wordIndexRepository.findWordIndexByIdWordContaining(w, PageRequest.of(page, limit)).map(WordIndex::getBook);
+        List<Word> w;
+        if (type == IndexSearchType.DEFAULT) {
+            w = Arrays.stream(word.split(","))
+                    .flatMap(wd -> wordRepository.findWordByWordContaining(wd).stream())
+                    .distinct()
+                    .collect(Collectors.toList());
+        } else {
+            w = wordRepository.findWordsByWordRegex(word);
+        }
+        if (w.isEmpty()) throw new NotFoundException("There is no book containing a word matching yours");
+
+        return wordIndexRepository.findWordIndexByIdListWordContaining(w, PageRequest.of(page, limit));
     }
 
-    public Page<Books> searchBooks(String search, SearchType type, boolean matchAll, int limit, int page) throws BadRequestException {
+    public Page<Books> searchBooks(String search, SearchType type, int limit, int page) throws BadRequestException {
         switch(type) {
             case DEFAULT:
-                System.out.println(limit+" "+page);
                 return booksContentRepository.findBooksContByContent(search, PageRequest.of(page, limit))
                         .map(booksCont -> booksRepository.findBooksByContent(booksCont.getId()));
             case REGEX:
@@ -94,6 +100,7 @@ public class BooksService {
     public Books removeBookById(String uuid) {
         Books books = booksRepository.findBooksByBookId(uuid);
         books.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+
         return booksRepository.save(books);
     }
 
@@ -104,6 +111,7 @@ public class BooksService {
         String ext = fn[fn.length - 1]; // extracting file's extension
         if (!ext.toLowerCase().equals("txt")) throw new FileNotSupportedException("File with ."+ext+" extension not supported");
         String content = new String(file.getBytes(), StandardCharsets.ISO_8859_1);
+
         return booksContentRepository.save(new BooksCont(content));
     }
 
@@ -113,6 +121,7 @@ public class BooksService {
         try {
             BooksCont content = uploadBookContent(file);
             Books book = new Books(bookReq.title, bookReq.year, bookReq.language, content.getId(), author);
+
             return booksRepository.save(book);
         } catch (IOException e) {
             throw new BadRequestException("An error occurred while processing the text file");
@@ -126,6 +135,7 @@ public class BooksService {
             BooksCont content = uploadBookContent(file);
             booksContentRepository.deleteById(book.getContent());
             book.setContent(content.getId());
+
             return booksRepository.save(book);
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -151,6 +161,7 @@ public class BooksService {
         if (booksRequest.title != null) book.setTitle(booksRequest.title);
         if (booksRequest.language != null) book.setLanguage(booksRequest.language);
         if (booksRequest.year != 0) book.setYear(booksRequest.year);
+
         return booksRepository.save(book);
     }
 
@@ -170,6 +181,7 @@ public class BooksService {
         tmp.createNewFile(); // Saving the file into the static directory to be accessible by typing the correct path
         OutputStream os = new FileOutputStream(tmp);
         os.write(file.getBytes());
+
         return tmp;
     }
 
