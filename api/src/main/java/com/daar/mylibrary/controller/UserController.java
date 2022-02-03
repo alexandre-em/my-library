@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,29 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Get User read books", description = "Allows to get user's read list.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
+    @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @SecurityRequirement(name = "globalSecurity")
+    @GetMapping("/books/{id}")
+    public ResponseEntity<Response> getUserReadBooks(@PathVariable String id, @RequestParam(name="current_page", defaultValue = "0") int current, @RequestParam(name = "limit", defaultValue = "20") int limit, @RequestHeader(name = "Authorization", required = false) String token) {
+        if (!Objects.equals(id, Constants.decodeToken(token).sub)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse("User id does not match"));
+        try {
+            StopWatch watch = new StopWatch();
+            watch.start();
+            Page<Response> readBooks = usersService.getReadBooks(id, current, limit)
+                    .map(BooksShortResponse::new);
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(readBooks, watch.getTotalTimeMillis()));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
     @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
     @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -64,6 +88,7 @@ public class UserController {
     @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
     @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
@@ -82,6 +107,7 @@ public class UserController {
     @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
     @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
@@ -100,6 +126,7 @@ public class UserController {
     @Operation(summary = "Delete an User", description = "Allows to delete an user.\n ### Permissions needed to access resources : \n- read:users\n- \n- delete:users")
     @ApiResponse(responseCode = "200", description = "User removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @DeleteMapping("/{id}")
