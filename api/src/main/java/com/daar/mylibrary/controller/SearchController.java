@@ -46,11 +46,6 @@ public class SearchController {
     @Autowired
     private UsersService usersService;
 
-    @Operation(summary = "Get User suggestion", description = "Allows to get user's suggestion.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
-    @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
-    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
-    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @GetMapping("/healthcheck")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok().body("The application is healthy");
@@ -79,31 +74,25 @@ public class SearchController {
         }
     }
 
-    private ResponseEntity<Response> search(String search, SearchType type, int limit, int page) {
-        try {
-            StopWatch watch = new StopWatch();
-            watch.start();
-            Page<Response> res = booksService.searchBooks(search, type, limit, page)
-                    .map(BooksShortResponse::new);
-            watch.stop();
-            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
-        }
-    }
-
     @Operation(summary = "Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by a comma.")
     @ApiResponse(responseCode = "200", description = "Books found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginationResponse.class)) })
     @ApiResponse(responseCode = "422", description = "Your request is invalid", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @GetMapping("/books/public")
-    public ResponseEntity<Response> searchBookReg(@RequestParam String search,
+    public ResponseEntity<Response> searchBookPublic(@RequestParam String search,
                                                   @RequestParam(name = "type", defaultValue = "DEFAULT", required = false) SearchType type,
                                                   @RequestParam(name = "limit", defaultValue = "20") int limit,
                                                   @RequestParam(name = "current_page", defaultValue = "0") int page
     ) {
         try {
-            return search(search, type, limit, page);
+            StopWatch watch = new StopWatch();
+            watch.start();
+            Page<Response> res = booksService.searchBooks(search, type, limit, page, null)
+                    .map(BooksShortResponse::new);
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
@@ -129,9 +118,16 @@ public class SearchController {
 
         try {
             usersService.addKeyword(userToken.sub, Arrays.asList(s));
-            return search(search, type, limit, page);
+            StopWatch watch = new StopWatch();
+            watch.start();
+            Page<Response> res = booksService.searchBooks(search, type, limit, page, userToken.sub)
+                    .map(BooksShortResponse::new);
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("not found"));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }

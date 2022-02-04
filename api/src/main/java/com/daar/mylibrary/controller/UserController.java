@@ -66,10 +66,10 @@ public class UserController {
         try {
             StopWatch watch = new StopWatch();
             watch.start();
-            Page<Response> readBooks = usersService.getReadBooks(id, current, limit)
-                    .map(BooksShortResponse::new);
+            List<Response> readBooks = usersService.getReadBooks(id, current, limit)
+                    .stream().map(BooksShortResponse::new).collect(Collectors.toList());
             watch.stop();
-            return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(readBooks, watch.getTotalTimeMillis()));
+            return ResponseEntity.status(HttpStatus.OK).body(new ListResponse(readBooks, watch.getTotalTimeMillis(), "USER_READ_BOOKS"));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {

@@ -25,4 +25,6 @@ public class BooksShortResponse implements Response {
     public String getImage() {
         return book.getImage();
     }
+
+    public int getYear() { return book.getYear(); }
 }
