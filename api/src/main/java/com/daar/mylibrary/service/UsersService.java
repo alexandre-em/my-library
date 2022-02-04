@@ -46,7 +46,7 @@ public class UsersService {
         return authorB;
     }
 
-    public Page<Books> getReadBooks(String id, int page, int limit) throws NotFoundException {
+    public List<Books> getReadBooks(String id, int page, int limit) throws NotFoundException {
         User user = findUser(id);
         if (user == null) throw new NotFoundException("user not found");
         return userRepository.findUserReadBooks(id, PageRequest.of(page, limit));
