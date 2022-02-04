@@ -42,6 +42,8 @@ public class BooksService {
     private WordRepository wordRepository;
     @Autowired
     private WordIndexRepository wordIndexRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public Page<BookScoring> searchBooksByIndex(String word, IndexSearchType type, int page, int limit) throws BadRequestException, NotFoundException {
         if (word.matches(".*\\d.*")) throw new BadRequestException("Your word contains a numeric value");
@@ -59,11 +61,30 @@ public class BooksService {
         return wordIndexRepository.findWordIndexByIdListWordContaining(w, PageRequest.of(page, limit));
     }
 
-    public Page<Books> searchBooks(String search, SearchType type, int limit, int page) throws BadRequestException {
+    public Page<Books> searchBooks(String search, SearchType type, int limit, int page, String userId) throws BadRequestException, NotFoundException {
         switch(type) {
             case DEFAULT:
-                return booksContentRepository.findBooksContByContent(search, PageRequest.of(page, limit))
-                        .map(booksCont -> booksRepository.findBooksByContent(booksCont.getId()));
+                if (userId != null) {
+                    User user = userRepository.findByUserIdAndDeletedAtIsNull(userId);
+                    if (user == null) throw new NotFoundException("User not found");
+                    List<String> authors = user
+                            .getReadList()
+                            .stream()
+                            .map(Books::getAuthorsName)
+                            .distinct()
+                            .collect(Collectors.toList());
+                    // TODO: Improve this trash code
+                    String[] params = {"N/A", "N/A", "N/A"};
+                    if (authors.size() > 0) params[0] = authors.get(0);
+                    if (authors.size() > 1) params[1] = authors.get(1);
+                    if (authors.size() > 2) params[2] = authors.get(2);
+
+                    return booksContentRepository.findBooksContByContentNotIn(search, user.getReadList().stream().map(Books::getContent).collect(Collectors.toList()), params[0], params[1], params[2], PageRequest.of(page, limit))
+                            .map(booksCont -> booksRepository.findBooksByContent(booksCont.getId()));
+                } else {
+                    return booksContentRepository.findBooksContByContent(search, PageRequest.of(page, limit))
+                            .map(booksCont -> booksRepository.findBooksByContent(booksCont.getId()));
+                }
             case REGEX:
                 return booksContentRepository.findBooksContentByContentMatchesRegex(search, PageRequest.of(page, limit))
                         .map(booksCont -> booksRepository.findBooksByContent(booksCont.getId()));
