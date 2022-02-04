@@ -5,6 +5,7 @@ import com.daar.mylibrary.dto.request.UserToken;
 import com.daar.mylibrary.dto.response.Authors.AuthorsResponse;
 import com.daar.mylibrary.dto.response.Books.BookScoringResponse;
 import com.daar.mylibrary.dto.response.Books.BooksShortResponse;
+import com.daar.mylibrary.dto.response.ElementRemovedResponse;
 import com.daar.mylibrary.dto.response.ErrorResponse;
 import com.daar.mylibrary.dto.response.PaginationResponse;
 import com.daar.mylibrary.dto.response.Response;
@@ -45,6 +46,16 @@ public class SearchController {
     @Autowired
     private UsersService usersService;
 
+    @Operation(summary = "Get User suggestion", description = "Allows to get user's suggestion.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
+    @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
+    @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
+    @GetMapping("/healthcheck")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok().body("The application is healthy");
+    }
+
     @Operation(summary = "[User] Basic search of authors of the Gutenberg library", description = "Search books from `keyword` by passing the param `search`. \nYou can also filter the search by `type`, select an `algorithm` and paginate the results.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
     @ApiResponse(responseCode = "200", description = "Author founded", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PaginationResponse.class))) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -53,7 +64,7 @@ public class SearchController {
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @SecurityRequirement(name = "globalSecurity")
     @GetMapping("/authors")
-    public ResponseEntity<Response> search(@RequestParam("search") String input,
+    public ResponseEntity<Response> searchAuthor(@RequestParam("search") String input,
                                                  @RequestParam(name = "current_page", defaultValue = "0") int page,
                                                  @RequestParam(name = "limit", defaultValue = "20") int limit) {
         try {
@@ -78,8 +89,6 @@ public class SearchController {
             return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -93,7 +102,11 @@ public class SearchController {
                                                   @RequestParam(name = "limit", defaultValue = "20") int limit,
                                                   @RequestParam(name = "current_page", defaultValue = "0") int page
     ) {
-        return search(search, type, limit, page);
+        try {
+            return search(search, type, limit, page);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @Operation(summary = "[User] Search a book by a word", description = "Search a book by keywords. Each keywords must be separated by a comma.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")
@@ -116,10 +129,12 @@ public class SearchController {
 
         try {
             usersService.addKeyword(userToken.sub, Arrays.asList(s));
+            return search(search, type, limit, page);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("not found"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
-        return search(search, type, limit, page);
     }
 
     @Operation(summary = "[User] Search a book by an indexed word", description = "Search a book by keywords. Each keywords must be separated by commas.\n ### Permissions needed to access resources : \n- read:books\n- read:authors")

@@ -32,7 +32,7 @@ public class UserController {
     @Autowired
     UsersService usersService;
 
-    @Operation(summary = "Get User suggestion", description = "Allows to get user's suggestion.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
+    @Operation(summary = "[User] Get User suggestion", description = "Allows to get user's suggestion.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
     @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -54,7 +54,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Get User read books", description = "Allows to get user's read list.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
+    @Operation(summary = "[User] Get User read books", description = "Allows to get user's read list.\n ### Permissions needed to access resources : \n- read:users\n- \n- read:books")
     @ApiResponse(responseCode = "200", description = "Book removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -85,7 +85,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(usersService.addUser(id)));
     }
 
-    @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
+    @Operation(summary = "[User] Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
     @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -104,7 +104,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
+    @Operation(summary = "[User] Add User into db", description = "Allows to add user to save readen books and suggest other.\n")
     @ApiResponse(responseCode = "200", description = "User added", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "401", description = "The authentication or authorization failed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
@@ -123,7 +123,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Delete an User", description = "Allows to delete an user.\n ### Permissions needed to access resources : \n- read:users\n- \n- delete:users")
+    @Operation(summary = "[Admin] Delete an User", description = "Allows to delete an user.\n ### Permissions needed to access resources : \n- read:users\n- \n- delete:users")
     @ApiResponse(responseCode = "200", description = "User removed", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ElementRemovedResponse.class)) })
     @ApiResponse(responseCode = "404", description = "User not founded", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "403", description = "You are not permitted to perform this action", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })

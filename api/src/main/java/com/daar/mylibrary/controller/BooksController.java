@@ -69,7 +69,7 @@ public class BooksController {
         }
     }
 
-    @Operation(summary = "Book details")
+    @Operation(summary = "[User] Book content")
     @ApiResponse(responseCode = "200", description = "Book found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = BooksContentResponse.class)) })
     @ApiResponse(responseCode = "404", description = "Book not found", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
     @ApiResponse(responseCode = "500", description = "Internal error", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
