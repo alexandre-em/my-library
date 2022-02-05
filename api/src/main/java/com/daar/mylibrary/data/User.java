@@ -21,6 +21,7 @@ public class User {
     private Long id;
     @Column(unique = true)
     private String userId;
+    @Column(columnDefinition = "LONGTEXT")
     private String keywords;
     @Column(name = "DELETED_AT")
     private Timestamp deletedAt;
