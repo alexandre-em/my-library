@@ -2,7 +2,7 @@ import CardBook from 'components/CardBook';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
-import { getAll, getId, userSearch } from 'services';
+import { getAll } from 'services';
 import { Button } from 'react-native-paper';
 import jwt_decode from "jwt-decode";
 import { userSuggestion } from 'services/users';
@@ -19,14 +19,11 @@ export default function Books() {
         suggestion();
         getAll(0,10)
           .then((res) => {
-            // setBooks(books => [...books, res])
-            //console.log(auth.accessToken); // contient le token pour les requetes prives (si login)
-            //console.log(res);
             setPublicBooks(res.data.data);
             setTotalPage(res.data.totalPage)
           })
           .catch((err) => {
-            //console.log(err);
+            console.log(err);
           });
       }, []);
     
@@ -46,7 +43,6 @@ export default function Books() {
 
         userSuggestion(token.sub,auth.accessToken)
         .then((res)=>{
-          console.log(res)
           setSuggest(res.data.data);
         })
       }
@@ -75,9 +71,9 @@ return(
             )}
         </View>
         <View style={styles.footerScroll}>
-            {page-1 >=0?<Button style={{width:"5%",marginRight:30}} mode="contained" onPress={() => changePage(-1)}>{"<"}</Button>:<></>}
-            <Text style={{marginTop:8}}>{page}</Text>
-            {1+page < totalPage?<Button style={{width:"5%",marginLeft:30}} mode="contained" onPress={() => changePage(1)}>{">"}</Button>:<></>}
+            {page-1 >=0?<Button style={styles.buttonType} mode="contained" onPress={() => changePage(-1)}>{"<"}</Button>:<></>}
+            <Text style={{marginTop:10}}>{page}</Text>
+            {1+page < totalPage?<Button style={styles.buttonType} mode="contained" onPress={() => changePage(1)}>{">"}</Button>:<></>}
         </View>
     </ScrollView>
     );
@@ -88,6 +84,11 @@ const styles = StyleSheet.create({
     flatlist: {
       flexDirection: 'column',
     },
+    buttonType : {
+      width:"5%",
+      marginRight:30,
+      marginLeft: 30,
+    },
     containerGrid: {
       display: 'flex',
       flexDirection: 'row',
@@ -97,13 +98,13 @@ const styles = StyleSheet.create({
       flexGrow: 1,
     },
     suggestCard :{
-      dispay : 'flex',
+      display : 'flex',
       flexDirection: 'row',
       flexWrap: 'nowrap',
       justifyContent: 'center',
     },
     containerCard :{
-      dispay : 'flex',
+      display : 'flex',
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'center',

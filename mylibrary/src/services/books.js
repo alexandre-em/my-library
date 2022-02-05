@@ -33,7 +33,7 @@ const getId = (uuid) => baseUrl.get(`books/public/${uuid}`);
  * @param {number} [limit=20] - default=20
  * @returns {Promise<AxiosResponse<BookShortRes>>}
  */
-const publicSearch = (input, type = 'DEFAULT', currentPage = 0, limit = 20) => (
+const publicSearch = (input, type, currentPage, limit = 10) => (
   baseUrl.get(`books/public?search=${input}&type=${type}&limit=${limit}&current_page=${currentPage}`)
 );
 
@@ -46,9 +46,13 @@ const publicSearch = (input, type = 'DEFAULT', currentPage = 0, limit = 20) => (
  * @param {number} [limit=20] - default=20
  * @returns {Promise<AxiosResponse<BookShortRes>>}
  */
-const userSearch = (input, accessToken, type = 'DEFAULT', currentPage = 0, limit = 20) => (
+const userSearch = (input, accessToken, type, currentPage, limit = 10) => (
   baseUrlAuthorization(accessToken).get(`books/public?search=${input}&type=${type}&limit=${limit}&current_page=${currentPage}`)
 );
+
+const getContentByID = (accessToken, id) =>(
+  baseUrlAuthorization(accessToken).get(`books/protected/${id}/content`)
+)
 
 
 
@@ -57,4 +61,5 @@ export {
   getId,
   publicSearch,
   userSearch,
+  getContentByID,
 };
