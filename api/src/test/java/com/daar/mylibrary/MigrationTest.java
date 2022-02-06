@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
-@SpringBootTest(classes = MylibraryApplication.class)
+//@SpringBootTest(classes = MylibraryApplication.class)
 public class MigrationTest {
     @Autowired
     private BooksRepository booksRepository;

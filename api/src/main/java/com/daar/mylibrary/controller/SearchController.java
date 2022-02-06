@@ -84,15 +84,16 @@ public class SearchController {
                                                   @RequestParam(name = "limit", defaultValue = "20") int limit,
                                                   @RequestParam(name = "current_page", defaultValue = "0") int page
     ) {
+        StopWatch watch = new StopWatch();
         try {
-            StopWatch watch = new StopWatch();
             watch.start();
             Page<Response> res = booksService.searchBooks(search, type, limit, page, null)
                     .map(BooksShortResponse::new);
             watch.stop();
             return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage(), watch.getTotalTimeMillis()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }
@@ -116,16 +117,17 @@ public class SearchController {
         // Separate each keyword by a comma
         String[] s = search.split(",");
 
+        StopWatch watch = new StopWatch();
         try {
             usersService.addKeyword(userToken.sub, Arrays.asList(s));
-            StopWatch watch = new StopWatch();
             watch.start();
             Page<Response> res = booksService.searchBooks(search, type, limit, page, userToken.sub)
                     .map(BooksShortResponse::new);
             watch.stop();
             return ResponseEntity.status(HttpStatus.OK).body(new PaginationResponse(res, watch.getTotalTimeMillis()));
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("not found"));
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("not found", watch.getTotalTimeMillis()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
@@ -149,9 +151,9 @@ public class SearchController {
     ) {
         UserToken userToken = Constants.decodeToken(token);
         String[] s = search.split(",");
+        StopWatch watch = new StopWatch();
         try {
             usersService.addKeyword(userToken.sub, Arrays.asList(s));
-            StopWatch watch = new StopWatch();
             watch.start();
             Page<Response> books = booksService.searchBooksByIndex(search, type, page, limit)
                     .map(BookScoringResponse::new);
@@ -160,7 +162,8 @@ public class SearchController {
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(e.getMessage()));
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+            watch.stop();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage(), watch.getTotalTimeMillis()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));
         }

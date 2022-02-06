@@ -45,6 +45,20 @@ public class BooksService {
     @Autowired
     private UserRepository userRepository;
 
+    public Page<Books> findAll(int page, int limit) { return booksRepository.findAllByDeletedAtIsNull(PageRequest.of(page, limit)); }
+    public Books findById(String uuid) { return booksRepository.findBooksByBookId(uuid); }
+
+    /**
+     *
+     * @param word      keywords entered by the user to search specific books
+     * @param type      type of the keywords
+     * @param page      current page
+     * @param limit     number of books on a page
+     * @return          A list of pertinent books answering the request
+     * @see BookScoring
+     * @throws BadRequestException
+     * @throws NotFoundException
+     */
     public Page<BookScoring> searchBooksByIndex(String word, IndexSearchType type, int page, int limit) throws BadRequestException, NotFoundException {
         if (word.matches(".*\\d.*")) throw new BadRequestException("Your word contains a numeric value");
         List<Word> w;
@@ -61,6 +75,17 @@ public class BooksService {
         return wordIndexRepository.findWordIndexByIdListWordContaining(w, PageRequest.of(page, limit));
     }
 
+    /**
+     *
+     * @param search    keywords entered by the user to search specific books
+     * @param type      type of the keywords
+     * @param limit     number of books on a page
+     * @param page      current page number
+     * @param userId    user id
+     * @return          A list of pertinent books answering the request
+     * @throws BadRequestException
+     * @throws NotFoundException
+     */
     public Page<Books> searchBooks(String search, SearchType type, int limit, int page, String userId) throws BadRequestException, NotFoundException {
         switch(type) {
             case DEFAULT:
@@ -105,6 +130,13 @@ public class BooksService {
         }
     }
 
+    /**
+     *
+     * @param uuid  book id
+     * @return      content of a book
+     * @see BooksCont
+     * @throws NotFoundException
+     */
     public BooksCont findBooksCont(String uuid) throws NotFoundException {
         Books book = booksRepository.findBooksByBookId(uuid);
         if (book == null) throw new NotFoundException("Book not found");
@@ -115,16 +147,28 @@ public class BooksService {
         return cont.get();
     }
 
-    public Page<Books> findAll(int page, int limit) { return booksRepository.findAllByDeletedAtIsNull(PageRequest.of(page, limit)); }
-    public Books findById(String uuid) { return booksRepository.findBooksByBookId(uuid); }
-
-    public Books removeBookById(String uuid) {
+    /**
+     * Soft remove a book
+     * @param uuid      book id
+     * @return removed book
+     * @throws NotFoundException
+     */
+    public Books removeBookById(String uuid) throws NotFoundException {
         Books books = booksRepository.findBooksByBookId(uuid);
+        if (books == null) throw new NotFoundException("Book not found");
         books.setDeletedAt(new Timestamp(System.currentTimeMillis()));
 
         return booksRepository.save(books);
     }
 
+    /**
+     * Upload a content for a book
+     * @param file      Text file to upload
+     * @return content of the book
+     * @throws BadRequestException
+     * @throws FileNotSupportedException
+     * @throws IOException
+     */
     public BooksCont uploadBookContent(MultipartFile file) throws BadRequestException, FileNotSupportedException, IOException {
         if (file.isEmpty()) throw  new BadRequestException("Please select a valid text file");
         String[] fn = file.getOriginalFilename().split("\\.");
@@ -136,6 +180,14 @@ public class BooksService {
         return booksContentRepository.save(new BooksCont(content));
     }
 
+    /**
+     * Add a book
+     * @param bookReq       Parameters of the new book to add
+     * @param file          Content file to upload
+     * @return Added book
+     * @throws FileNotSupportedException
+     * @throws BadRequestException
+     */
     public Books addBook(BooksRequest bookReq, MultipartFile file) throws FileNotSupportedException, BadRequestException {
         Authors author = authorsRepository.findAuthorsByName(bookReq.authors);
         if (author == null) authorsRepository.save(new Authors(bookReq.authors));
@@ -149,6 +201,15 @@ public class BooksService {
         }
     }
 
+    /**
+     * Update the content of a book
+     * @param uuid      book id
+     * @param file      Content file to upload
+     * @return the updated book
+     * @throws FileNotSupportedException
+     * @throws NotFoundException
+     * @throws BadRequestException
+     */
     public Books updateBookContent(String uuid, MultipartFile file) throws FileNotSupportedException, NotFoundException, BadRequestException {
         Books book = booksRepository.findBooksByBookId(uuid);
         if (book == null) throw new NotFoundException("Book with the following id not founded: " + uuid);
@@ -164,6 +225,13 @@ public class BooksService {
         }
     }
 
+    /**
+     * Update book's information
+     * @param uuid              book id
+     * @param booksRequest      books parameter to update
+     * @return updated book
+     * @throws NotFoundException
+     */
     public Books updateBook(String uuid, BooksRequest booksRequest) throws NotFoundException {
         Books book = booksRepository.findBooksByBookId(uuid);
         if (book == null) throw new NotFoundException("There is no such book");
@@ -206,6 +274,13 @@ public class BooksService {
         return tmp;
     }
 
+    /**
+     * Update the cover of a book
+     * @param uuid      book id
+     * @param image     url of the image
+     * @return the updated book
+     * @throws NotFoundException
+     */
     public Books updateBookUrlCover(String uuid, String image) throws NotFoundException {
         // Check if book exists
         Books book = booksRepository.findBooksByBookId(uuid);
@@ -216,6 +291,15 @@ public class BooksService {
         return booksRepository.save(book);
     }
 
+    /**
+     * @deprecated This is no more used since we use Elastic Beanstalk that generates an error when uploading a file
+     * @param uuid      book id
+     * @param image     File that contains the picture
+     * @return updated book
+     * @throws BadRequestException
+     * @throws NotFoundException
+     * @throws FileNotSupportedException
+     */
     public Books updateBookCover(String uuid, MultipartFile image) throws BadRequestException, NotFoundException, FileNotSupportedException {
         // Check if book exists
         Books book = booksRepository.findBooksByBookId(uuid);
