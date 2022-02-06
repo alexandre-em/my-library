@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Dimensions } from 'react-native';
 import { Button, Card, Paragraph, Dialog, Portal } from 'react-native-paper';
-import noImage from 'assets/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg';
 import { getContentByID, getId } from 'services';
 import jwt_decode from "jwt-decode";
 import { useSelector } from 'react-redux';
@@ -11,18 +10,19 @@ export default function CardBook(props) {
     const { title, author, image, id } = props.item
     const auth = useSelector((state) => state.auth);
     const type = props.type
-
+    const noImage = "https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg"
     const windowHeight = Dimensions.get('window').height;
 
     const [visible, setVisible] = useState(false);
 
     const manageDialog = () => setVisible(prevState => !prevState);
-
+    
   
     const [annee,setAnnee] = useState("")
     const [langue,setLangue] = useState("")
     const [content,setContent] = useState("")
 
+    
     useEffect(() => {
       descriptionBook(id)
     }, []);
@@ -70,7 +70,7 @@ export default function CardBook(props) {
         {
         type==="profilCard" ? <>
           <Card style={{width:200, margin:10}}>
-            <Card.Cover source={image?image:noImage}/> 
+            <Card.Cover source={{uri:image?image:noImage}} />
             <Card.Title style={{textOverflow: 'ellipsis',overflow: 'hidden' }}title={title} subtitle={author} />
             <Card.Content>
               <Paragraph>Année : {annee}</Paragraph>
@@ -84,7 +84,7 @@ export default function CardBook(props) {
           
         </> :
           <Card style={{width:200, margin:10}}>
-              <Card.Cover source={image?image:noImage} />
+              <Card.Cover source={{uri:image?image:noImage}} />
               <Card.Title style={{textOverflow: 'ellipsis',overflow: 'hidden' }}title={title} subtitle={author} />
               <Card.Actions>
               <Button onPress={() => openDialog(id)}>View more</Button>

@@ -1,6 +1,6 @@
 import CardBook from 'components/CardBook';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import { getAll } from 'services';
 import { Button } from 'react-native-paper';
@@ -14,7 +14,7 @@ export default function Books() {
     const [totalPage, setTotalPage] = useState(0);
     const auth = useSelector((state) => state.auth);
     const [suggest, setSuggest] = useState([]);
-
+  
     useEffect(() => {
         suggestion();
         getAll(0,10)
@@ -53,7 +53,10 @@ export default function Books() {
 return(
     <ScrollView>
 
-      {auth.isAuthenticated&&<Title style={{display:'flex', justifyContent: 'center',fontFamily:"Roboto_900Black", fontSize:30, margin:10}}>Suggestion</Title>}
+      {auth.isAuthenticated&&
+      <View style={{display:'flex', flexDirection:'row', justifyContent: 'center'}}>
+          <Title style={styles.title}>Suggestion</Title>
+        </View>}
         <ScrollView horizontal>
           <View style={styles.suggestCard}>
               {suggest.map(item=>
@@ -62,9 +65,9 @@ return(
           </View>
         </ScrollView>
         
-
-        <Title style={{display:'flex', justifyContent: 'center',fontFamily:"Roboto_900Black", fontSize:30, marginTop:30, marginBottom:10}}>Liste des livres</Title>
-
+        <View style={{display:'flex', flexDirection:'row', justifyContent: 'center'}}>
+          <Text style={styles.title}>Liste des livres</Text>
+        </View>
         <View style={styles.containerCard}>
             {publicBooks.map(item=>
             <CardBook key={item.id} item = {item}></CardBook>
@@ -83,6 +86,11 @@ return(
 const styles = StyleSheet.create({
     flatlist: {
       flexDirection: 'column',
+    },
+    title:{
+      fontFamily:"Roboto_900Black",
+      fontSize:30,
+      margin:10,
     },
     buttonType : {
       width:"5%",

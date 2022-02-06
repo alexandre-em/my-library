@@ -49,7 +49,12 @@ const publicSearch = (input, type, currentPage, limit = 10) => (
 const userSearch = (input, accessToken, type, currentPage, limit = 10) => (
   baseUrlAuthorization(accessToken).get(`books/public?search=${input}&type=${type}&limit=${limit}&current_page=${currentPage}`)
 );
-
+/**
+ * 
+ * @param {string} accessToken 
+ * @param {string} id 
+ * @returns 
+ */
 const getContentByID = (accessToken, id) =>(
   baseUrlAuthorization(accessToken).get(`books/protected/${id}/content`)
 )

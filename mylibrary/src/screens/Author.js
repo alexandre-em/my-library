@@ -12,21 +12,17 @@ export default function Author() {
     const [totalPage, setTotalPage] = useState(0);
     
     useEffect(() => {
-        getAuthors(0);
+      getAllAuthor(0)
+      .then((res)=>{
+          setPage(0)
+          setAuthorsQuery(res.data.data);
+          setTotalPage(res.data.totalPage)
+      })
+      .catch((err)=>{
+          console.log(err);
+      })
     },[]);
 
-
-    const getAuthors = (nb) =>{
-        getAllAuthor(nb)
-            .then((res)=>{
-                setPage(nb+page)
-                setAuthorsQuery(res.data.data);
-                setTotalPage(res.data.totalPage)
-            })
-            .catch((err)=>{
-                console.log(err);
-            })
-    }
     
     const changePage = (nb) =>{
         if((nb+page < totalPage) && (page+nb >=0)){

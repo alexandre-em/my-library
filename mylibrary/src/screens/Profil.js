@@ -16,12 +16,10 @@ export default function Profil() {
     },[]);
 
     const getBooksUser = () =>{
-        console.log(auth.isAuthenticated)
         if(auth.isAuthenticated){
             const token = jwt_decode(auth.accessToken);
             getAllBookRead(auth.accessToken, token.sub, 0)
             .then((res)=>{
-                console.log(res.data.data);
                 setbookRead(res.data.data)
             })
             .catch((err)=>{
@@ -36,8 +34,10 @@ export default function Profil() {
         
             auth.isAuthenticated ? 
                 <ScrollView>
-            
-                <Text>Historique de vos lecture</Text>
+                <View style={{display:'flex', flexDirection:'row', justifyContent: 'center'}}>
+                    <Text style={styles.title}>Historique de vos lecture</Text>
+                </View>
+                
                 <View style={styles.containerCard}>
                 {bookRead.map(item=>
                     <CardBook key={item.id} item = {item} type="profilCard"></CardBook>
@@ -57,6 +57,11 @@ const styles = StyleSheet.create({
     flatlist: {
       flexDirection: 'column',
     },
+    title:{
+        fontFamily:"Roboto_900Black",
+        fontSize:30,
+        margin:10,
+      },
     containerGrid: {
       display: 'flex',
       flexDirection: 'row',
