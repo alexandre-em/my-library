@@ -40,7 +40,6 @@ export default function CardBook(props) {
     }
 
     const openDialog = (id) =>{
-        affichageDonnees(id);
         manageDialog();
         getContent(id); 
         if(auth.isAuthenticated){
