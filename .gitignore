@@ -9,6 +9,7 @@ api/static/*.jpg
 api/static/*.png
 
 ### data folder
+*.mp4
 books_words_occ.json
 all_words.json
 data/books
@@ -16,6 +17,8 @@ data/books.json
 /data/env
 data/logfile.log
 data/*.swp
+data/*.ipynb
+data/.ipynb_checkpoints
 api/src/main/resources/books.json
 api/src/main/resources/static/*
 api/static/books/
