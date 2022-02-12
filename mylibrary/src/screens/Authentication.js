@@ -1,12 +1,11 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 
 import { authSlice } from 'store';
-import useAuthentication from 'hooks/useAuthentication';
+import { useAuthentication } from 'hooks';
 import Book from 'assets/undraw_Books_l33t.png';
-//import SvgDisplay from 'components/SvgDisplay';
 
 const styles = StyleSheet.create({
   container: {
