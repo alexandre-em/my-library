@@ -1,14 +1,20 @@
 import CardBook from 'components/CardBook';
 import React, { useEffect, useState } from 'react';
 import {
-  View, StyleSheet, ScrollView, Text,
+  View, StyleSheet, ScrollView, Image, Platform,
 } from 'react-native';
+import {
+  Tabs,
+  TabScreen,
+} from 'react-native-paper-tabs';
 import { useSelector } from 'react-redux';
 import { ActivityIndicator, DataTable, Title } from 'react-native-paper';
 import jwtDecode from 'jwt-decode';
 
 import { getAll, userSuggestion } from 'services';
 import { useLoader } from 'hooks';
+
+import Suggestion from 'assets/undraw_reading_time_re_phf7-svg.png';
 
 const styles = StyleSheet.create({
   flatlist: {
@@ -95,49 +101,57 @@ export default function Books() {
   }, [page, booksPerPage]);
 
   return (
-    <ScrollView>
-      {auth.isAuthenticated
-      && (
-      <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-        <Title style={styles.title}>Suggestion</Title>
-      </View>
-      )}
-      <ScrollView horizontal>
-        <View style={styles.suggestCard}>
-          {suggest.map((item) => <CardBook key={item.id} item={item} />)}
-        </View>
-      </ScrollView>
-
-      <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-        <Text style={styles.title}>Liste des livres</Text>
-      </View>
-
-      {loaderState.books && (
-      <ActivityIndicator
-        animating
-        size={45}
-        style={{
-          position: 'absolute', left: '50%', bottom: '50%', zIndex: 100,
-        }}
-      />
-      )}
-
-      <View style={styles.containerCard}>
-        {publicBooks.map((item) => <CardBook key={item.id} item={item} />)}
-      </View>
-      <View style={styles.footerScroll}>
-        <DataTable.Pagination
-          page={page}
-          numberOfPages={totalPage}
-          onPageChange={(p) => setPage(p)}
-          label={`${page * booksPerPage} of ${totalBooks}`}
-          showFastPaginationControls
-          numberOfItemsPerPageList={numberOfItemsPerPageList}
-          numberOfItemsPerPage={booksPerPage}
-          onItemsPerPageChange={setBooksPerPage}
-          selectPageDropdownLabel="Books per page"
-        />
-      </View>
-    </ScrollView>
+    <Tabs defaultIndex={1}>
+      <TabScreen label="Suggestion" icon="thumb-up" disabled={!auth.isAuthenticated}>
+        <ScrollView>
+          <Image
+            source={Suggestion}
+            width={150}
+            height={150}
+            style={{
+              width: '100%', maxWidth: 300, height: 200, alignSelf: 'center', margin: 20, resizeMode: 'contain',
+            }}
+          />
+          <Title style={{ alignSelf: 'center', fontFamily: 'Roboto_900Black' }}>Suggestion</Title>
+          <ScrollView horizontal>
+            <View style={styles.suggestCard}>
+              {suggest.map((item) => <CardBook key={item.id} item={item} />)}
+            </View>
+          </ScrollView>
+        </ScrollView>
+      </TabScreen>
+      <TabScreen
+        label="All"
+        icon="book-multiple"
+      >
+        <ScrollView>
+          {loaderState.books && (
+          <ActivityIndicator
+            animating
+            size={45}
+            style={{
+              position: 'absolute', left: '50%', bottom: '50%', zIndex: 100,
+            }}
+          />
+          )}
+          <View style={styles.containerCard}>
+            {publicBooks.map((item) => <CardBook key={item.id} item={item} />)}
+          </View>
+          <View style={styles.footerScroll}>
+            <DataTable.Pagination
+              page={page}
+              numberOfPages={totalPage}
+              onPageChange={(p) => setPage(p)}
+              label={`${page * booksPerPage} of ${totalBooks}`}
+              showFastPaginationControls
+              numberOfItemsPerPageList={numberOfItemsPerPageList}
+              numberOfItemsPerPage={booksPerPage}
+              onItemsPerPageChange={setBooksPerPage}
+              selectPageDropdownLabel="Books per page"
+            />
+          </View>
+        </ScrollView>
+      </TabScreen>
+    </Tabs>
   );
 }
