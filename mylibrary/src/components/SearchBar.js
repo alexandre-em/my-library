@@ -1,19 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Searchbar } from 'react-native-paper';
 
 export default function SearchBar() {
-    const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
-    const onChangeSearch = query => setSearchQuery(query);
-
-    
+  const onChangeSearch = (query) => setSearchQuery(query);
 
   return (
     <Searchbar
       placeholder="Search"
       onChangeText={onChangeSearch}
       value={searchQuery}
-      style = {{margin:10}}
+      style={{ margin: 10 }}
     />
   );
 }
