@@ -4,10 +4,11 @@ import {
   View, StyleSheet, ScrollView, Text,
 } from 'react-native';
 import { useSelector } from 'react-redux';
-import { DataTable, Title } from 'react-native-paper';
+import { ActivityIndicator, DataTable, Title } from 'react-native-paper';
 import jwtDecode from 'jwt-decode';
 
 import { getAll, userSuggestion } from 'services';
+import { useLoader } from 'hooks';
 
 const styles = StyleSheet.create({
   flatlist: {
@@ -64,6 +65,7 @@ export default function Books() {
   const [totalBooks, setTotalBooks] = useState(0);
   const auth = useSelector((state) => state.auth);
   const [suggest, setSuggest] = useState([]);
+  const { loaderState, setToLoading } = useLoader();
 
   const suggestion = () => {
     if (auth.isAuthenticated) {
@@ -77,21 +79,23 @@ export default function Books() {
   };
 
   useEffect(() => {
+    setToLoading({ books: true });
     suggestion();
     getAll(page, booksPerPage)
       .then((res) => {
         setPublicBooks(res.data.data);
         setTotalPage(res.data.totalPage);
         setTotalBooks(res.data.totalElement);
+        setToLoading({ books: false });
       })
       .catch((err) => {
+        setToLoading({ books: false });
         console.log(err);
       });
   }, [page, booksPerPage]);
 
   return (
     <ScrollView>
-
       {auth.isAuthenticated
       && (
       <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
@@ -107,6 +111,17 @@ export default function Books() {
       <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
         <Text style={styles.title}>Liste des livres</Text>
       </View>
+
+      {loaderState.books && (
+      <ActivityIndicator
+        animating
+        size={45}
+        style={{
+          position: 'absolute', left: '50%', bottom: '50%', zIndex: 100,
+        }}
+      />
+      )}
+
       <View style={styles.containerCard}>
         {publicBooks.map((item) => <CardBook key={item.id} item={item} />)}
       </View>

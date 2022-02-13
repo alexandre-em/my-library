@@ -19,7 +19,6 @@ const redirectUri = AuthSession.makeRedirectUri({ useProxy });
 export default function useAuthentication() {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  //console.log(AUTH0_DOMAIN)
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
       redirectUri,

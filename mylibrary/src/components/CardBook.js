@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { ScrollView, Dimensions } from 'react-native';
+import { ScrollView, Dimensions, Image } from 'react-native';
 import {
-  Button, Card, Paragraph, Dialog, Portal,
+  Button, Card, Paragraph, Dialog, Portal, ActivityIndicator,
 } from 'react-native-paper';
 import { getContentByID } from 'services';
 import { useSelector } from 'react-redux';
@@ -9,6 +9,9 @@ import jwtDecode from 'jwt-decode';
 import propTypes from 'prop-types';
 
 import { bookRead } from 'services/users';
+import { useLoader } from 'hooks';
+
+import NotConnected from 'assets/undraw_Access_account_re_8spm.png';
 
 export default function CardBook({ item, type }) {
   const {
@@ -23,15 +26,19 @@ export default function CardBook({ item, type }) {
   const manageDialog = () => setVisible((prevState) => !prevState);
 
   const [content, setContent] = useState('');
+  const { loaderState, setToLoading } = useLoader();
 
   const getContent = useCallback(() => {
+    setToLoading({ book: true });
     if (auth.isAuthenticated) {
       getContentByID(auth.accessToken, id)
         .then((res) => {
           setContent(res.data.booksContent);
+          setToLoading({ book: false });
         })
         .catch((err) => {
           console.log(err);
+          setToLoading({ book: false });
         });
     }
   }, [id]);
@@ -42,7 +49,6 @@ export default function CardBook({ item, type }) {
     if (auth.isAuthenticated) {
       const token = jwtDecode(auth.accessToken);
       bookRead(token.sub, id, auth.accessToken).then(() => {
-
       })
         .catch((err) => {
           console.log(err);
@@ -78,6 +84,15 @@ export default function CardBook({ item, type }) {
           <Dialog.Title>{title}</Dialog.Title>
           {auth.isAuthenticated ? (
             <Dialog.ScrollArea>
+              {loaderState.book && (
+              <ActivityIndicator
+                animating
+                size={45}
+                style={{
+                  position: 'absolute', left: '50%', bottom: '50%', zIndex: 100,
+                }}
+              />
+              )}
               <ScrollView>
                 <Paragraph>
                   {content}
@@ -85,11 +100,18 @@ export default function CardBook({ item, type }) {
               </ScrollView>
             </Dialog.ScrollArea>
           ) : (
-            <Dialog.ScrollArea>
-              <Paragraph>
+            <Dialog.ScrollArea style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Image
+                source={NotConnected}
+                width="100%"
+                height="100%"
+                style={{
+                  maxWidth: 500, maxHeight: 500, height: '100%', width: '100%', resizeMode: 'contain',
+                }}
+              />
+              <Paragraph style={{ fontFamily: 'Roboto_900Black', fontSize: 17, textAlign: 'center' }}>
                 Vous n&apos;êtes pas connecté
               </Paragraph>
-
             </Dialog.ScrollArea>
           )}
           <Dialog.Actions>

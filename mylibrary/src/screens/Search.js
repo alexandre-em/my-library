@@ -1,14 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {
-  View, ScrollView, StyleSheet,
+  View, ScrollView, StyleSheet, Image, Platform,
 } from 'react-native';
 import {
-  Searchbar, Button, Menu, Chip, DataTable,
+  Searchbar, Button, Menu, Chip, DataTable, ActivityIndicator,
 } from 'react-native-paper';
 
 import { publicSearch, userSearch } from 'services';
 import { CardBook } from 'components';
+import SearchImage from 'assets/undraw_the_search_s0xf.png';
+import { useLoader } from 'hooks';
 
 const styles = StyleSheet.create({
   flatlist: {
@@ -57,16 +59,20 @@ export default function Search() {
   const [showMenu, setShowMenu] = useState(false);
   const [selectedValue, setSelectedValue] = useState('DEFAULT');
   const onChangeSearch = (query) => setSearchQuery(query);
+  const { loaderState, setToLoading } = useLoader();
 
   const searchBook = useCallback((p, bpp) => {
+    setToLoading({ search: true });
     if (auth.isAuthenticated) {
       userSearch(searchQuery, auth.accessToken, selectedValue, p, bpp)
         .then((res) => {
           setPublicBooks(res.data.data);
           setTotalPage(res.data.totalPage);
           setTotalBooks(res.data.totalElement);
+          setToLoading({ search: false });
         })
         .catch((err) => {
+          setToLoading({ search: false });
           console.log(err);
         });
     } else {
@@ -75,9 +81,11 @@ export default function Search() {
           setPublicBooks(res.data.data);
           setTotalPage(res.data.totalPage);
           setTotalBooks(res.data.totalElement);
+          setToLoading({ search: false });
         })
         .catch((err) => {
           console.log(err);
+          setToLoading({ search: false });
         });
     }
   }, [auth, searchQuery, selectedValue]);
@@ -93,7 +101,6 @@ export default function Search() {
 
   return (
     <ScrollView>
-
       <Searchbar
         placeholder="Search"
         onChangeText={onChangeSearch}
@@ -114,7 +121,7 @@ export default function Search() {
             >
               Filtres
             </Button>
-)}
+          )}
         >
           <Menu.Item onPress={() => handleSelect('DEFAULT')} title="DEFAULT" />
           <Menu.Item onPress={() => handleSelect('TITLE')} title="TITLE" />
@@ -122,8 +129,26 @@ export default function Search() {
           <Menu.Item onPress={() => handleSelect('YEAR')} title="YEAR" />
           <Menu.Item onPress={() => handleSelect('REGEX')} title="REGEX" />
         </Menu>
-        <Chip style={{ margin: 10, width: 'min-content' }}>{selectedValue}</Chip>
+        <Chip style={{ margin: 10, alignSelf: 'flex-end', height: 32 }}>{selectedValue}</Chip>
       </View>
+
+      {loaderState.search && (
+      <ActivityIndicator
+        animating
+        size={45}
+      />
+      )}
+
+      {publicBooks.length < 1 && (
+      <Image
+        source={SearchImage}
+        width={150}
+        height={150}
+        style={{
+          width: '100%', maxWidth: 300, maxHeight: 200, alignSelf: 'center', margin: 20, resizeMode: 'contain', ...(Platform.OS === 'web' && { height: '100%' }),
+        }}
+      />
+      )}
 
       <View style={styles.containerCard}>
         {publicBooks.map((item) => <CardBook key={item.id} item={item} />)}
@@ -141,7 +166,6 @@ export default function Search() {
           selectPageDropdownLabel="Books per page"
         />
       </View>
-
     </ScrollView>
   );
 }

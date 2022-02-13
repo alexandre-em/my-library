@@ -1,7 +1,7 @@
 import axios from 'axios';
+// eslint-disable-next-line import/no-unresolved
 import { API_URL } from '@env';
 
-//console.log(API_URL)
 const baseUrl = axios.create({
   baseURL: API_URL,
   headers: { 'Access-Control-Allow-Origin': '*' },

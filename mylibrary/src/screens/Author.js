@@ -5,7 +5,8 @@ import {
 
 import { CardAuthor } from 'components';
 import { getAllAuthor } from 'services';
-import { DataTable } from 'react-native-paper';
+import { ActivityIndicator, DataTable } from 'react-native-paper';
+import { useLoader } from 'hooks';
 
 const styles = StyleSheet.create({
   flatlist: {
@@ -52,21 +53,31 @@ export default function Author() {
   const [totalPage, setTotalPage] = useState(0);
   const [totalAuthors, setTotalAuthors] = useState(0);
   const [authorsPerPage, setAuthorsPerPage] = useState(10);
+  const { setToLoading, loaderState } = useLoader();
 
   useEffect(() => {
+    setToLoading({ authors: true });
     getAllAuthor(page, authorsPerPage)
       .then((res) => {
         setAuthorsQuery(res.data.data);
         setTotalPage(res.data.totalPage);
         setTotalAuthors(res.data.totalElement);
+        setToLoading({ authors: false });
       })
       .catch((err) => {
         console.log(err);
+        setToLoading({ authors: false });
       });
   }, [page, authorsPerPage]);
 
   return (
     <ScrollView>
+      {loaderState.authors && (
+      <ActivityIndicator
+        animating
+        size={45}
+      />
+      )}
       <View style={styles.containerCard}>
         {authorsQuery.map((element) => <CardAuthor key={element.id} item={element} />)}
       </View>

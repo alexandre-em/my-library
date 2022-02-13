@@ -1,5 +1,7 @@
 import React, { useCallback } from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import {
+  Dimensions, Image, StyleSheet, View,
+} from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 
@@ -24,6 +26,8 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
@@ -44,12 +48,19 @@ export default function Authentication() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Library</Text>
-      <Image source={Book} style={{ width, height: width }} width={width} height={width} />
+      <Image
+        source={Book}
+        style={{
+          width: '100%', height: '100%', maxWidth: 650, maxHeight: 400, resizeMode: 'contain',
+        }}
+        width={width}
+        height={width}
+      />
       <View style={styles.buttons}>
-        <Button labelStyle={{ color: 'white' }} disabled={!request} mode="contained" icon="account-check" onPress={login}>
+        <Button style={{ margin: 5 }} labelStyle={{ color: 'white' }} disabled={!request} mode="contained" icon="account-check" onPress={login}>
           Sign in
         </Button>
-        <Button icon="alien" onPress={handleSkip}>Continue</Button>
+        <Button style={{ margin: 5 }} icon="alien" onPress={handleSkip}>Continue</Button>
       </View>
     </View>
   );
